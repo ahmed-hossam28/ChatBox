@@ -1,14 +1,22 @@
+import org.example.chatbox.app.ServerSocketHandler;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
+import java.util.Scanner;
 
 public class ChatApp extends JFrame {
     private JPanel chatPanel;
     private JTextField messageField;
-
+    ServerSocketHandler server ;
     public ChatApp() {
+        try {
+            server  = new ServerSocketHandler();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         setTitle("Chat App");
         setSize(600, 400);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -38,6 +46,14 @@ public class ChatApp extends JFrame {
                 String message = messageField.getText();
                 if (!message.isEmpty()) {
                     addMessage("You", message, true);
+                    try {
+                        MessageSender messageSender = new MessageSender(server.getBufferedWriter());
+                        messageSender.setMessage(messageField.getText());
+                        messageSender.send();
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+
                     messageField.setText("");
                 }
             }
@@ -61,7 +77,7 @@ public class ChatApp extends JFrame {
         add(inputPanel, BorderLayout.SOUTH);
     }
 
-    private void addMessage(String sender, String message, boolean isSender) {
+    public void addMessage(String sender, String message, boolean isSender) {
         JPanel messagePanel = new JPanel();
         messagePanel.setLayout(new BorderLayout());
         messagePanel.setBackground(isSender ? new Color(173, 216, 230) : Color.LIGHT_GRAY);
@@ -92,7 +108,7 @@ public class ChatApp extends JFrame {
         repaint();
     }
 
-    private void sendFile(File file) {
+    public void sendFile(File file) {
         // You can implement the file sending logic here
         // For demonstration, we'll just print the file name
         System.out.println("Sending file: " + file.getName());
@@ -100,8 +116,29 @@ public class ChatApp extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            ChatApp2 chatApp = new ChatApp2();
+            ChatApp chatApp = new ChatApp();
             chatApp.setVisible(true);
+            try {
+                chatApp.server.start();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            // Start a thread to continuously receive messages
+            new Thread(() -> {
+                BufferedReader bufferedReader = chatApp.server.getBufferedReader();
+                MessageReceiver messageReceiver = new MessageReceiver(bufferedReader);
+                while (true) {
+                    // Receive message
+                    messageReceiver.receive();
+                    System.out.println(messageReceiver.getMessage());
+                    // Update GUI with received message
+                    SwingUtilities.invokeLater(() -> {
+                        chatApp.addMessage("Friend", messageReceiver.getMessage(), false);
+                    });
+                }
+            }).start();
         });
     }
+
 }

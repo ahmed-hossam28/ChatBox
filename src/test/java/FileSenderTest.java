@@ -29,7 +29,8 @@ public class FileSenderTest {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else {
+        }
+        else {
             System.out.println("File selection canceled");
         }
     }

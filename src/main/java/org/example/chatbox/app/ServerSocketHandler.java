@@ -6,7 +6,7 @@ import java.net.Socket;
 
 public class ServerSocketHandler {
     ServerSocket serverSocket;
-    final int PORT  = 12345;
+     int port = 12345;
     Socket client;
     //input
     InputStream inputStream;
@@ -18,7 +18,7 @@ public class ServerSocketHandler {
     BufferedWriter bufferedWriter;
   public ServerSocketHandler() throws IOException {
        //tcp connection
-            serverSocket = new ServerSocket(PORT);
+            serverSocket = new ServerSocket(port);
     }
     public ServerSocketHandler(int port) throws IOException {
         serverSocket = new ServerSocket(port);
@@ -47,4 +47,39 @@ public class ServerSocketHandler {
       bufferedWriter.flush();
     }
 
+    public ServerSocket getServerSocket() {
+        return serverSocket;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public Socket getClient() {
+        return client;
+    }
+
+    public InputStream getInputStream() {
+        return inputStream;
+    }
+
+    public InputStreamReader getInputStreamReader() {
+        return inputStreamReader;
+    }
+
+    public BufferedReader getBufferedReader() {
+        return bufferedReader;
+    }
+
+    public OutputStream getOutputStream() {
+        return outputStream;
+    }
+
+    public OutputStreamWriter getOutputStreamWriter() {
+        return outputStreamWriter;
+    }
+
+    public BufferedWriter getBufferedWriter() {
+        return bufferedWriter;
+    }
 }

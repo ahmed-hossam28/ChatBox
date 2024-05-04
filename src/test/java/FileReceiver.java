@@ -1,37 +1,43 @@
 import java.io.*;
-import java.net.*;
 
 public class FileReceiver {
-    public static void main(String[] args) {
-        int port = 12345;
-        String saveDir = "received_files/";
+    String saveDir = "received_files/";
+     InputStream inputStream;
+     File file;
+     String filename;
+     String savePath;
+   public  FileReceiver(InputStream inputStream){
+         this.inputStream = inputStream;
+     }
 
-        try (ServerSocket serverSocket = new ServerSocket(port);
-             Socket socket = serverSocket.accept();
-             InputStream inputStream = socket.getInputStream();
-             DataInputStream dataInputStream = new DataInputStream(inputStream)) {
+     public void receive(){
+         DataInputStream dataInputStream = new DataInputStream(inputStream);
+         try {
+             filename = dataInputStream.readUTF();
+         } catch (IOException e) {
+             throw new RuntimeException(e);
+         }
+         savePath = saveDir+filename;
+         try (FileOutputStream fileOutputStream = new FileOutputStream(savePath)) {
+             byte[] buffer = new byte[1024];
+             int bytesRead;
+             while ((bytesRead = inputStream.read(buffer)) != -1) {
+                 fileOutputStream.write(buffer, 0, bytesRead);
+             }
+             System.out.println("File received and saved successfully");
+             file = new File(savePath);
+         }
+         catch (IOException e) {
+             throw new RuntimeException(e);
+         }
 
-            // Receive the filename from the client
-            String filename = dataInputStream.readUTF();
-            String savePath = saveDir + filename;
+     }
 
-            // Create directories if they don't exist
-            File directory = new File(saveDir);
-            if (!directory.exists()) {
-                directory.mkdirs();
-            }
+    public File getFile() {
+        return file;
+    }
 
-            // Receive and save the file
-            try (FileOutputStream fileOutputStream = new FileOutputStream(savePath)) {
-                byte[] buffer = new byte[1024];
-                int bytesRead;
-                while ((bytesRead = inputStream.read(buffer)) != -1) {
-                    fileOutputStream.write(buffer, 0, bytesRead);
-                }
-                System.out.println("File received and saved successfully");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public String getFilename() {
+        return filename;
     }
 }

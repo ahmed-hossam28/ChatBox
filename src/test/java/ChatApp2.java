@@ -1,3 +1,5 @@
+import org.example.chatbox.app.SocketHandler;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -7,8 +9,14 @@ import java.io.*;
 public class ChatApp2 extends JFrame {
     private JPanel chatPanel;
     private JTextField messageField;
+    SocketHandler client  ;
 
-    public ChatApp2() {
+    public ChatApp2()  {
+        try {
+            client = new SocketHandler();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         setTitle("Chat App");
         setSize(600, 400);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -38,6 +46,13 @@ public class ChatApp2 extends JFrame {
                 String message = messageField.getText();
                 if (!message.isEmpty()) {
                     addMessage("You", message, true);
+                    try {
+                        MessageSender messageSender = new MessageSender(client.getBufferedWriter());
+                        messageSender.setMessage(messageField.getText());
+                        messageSender.send();
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
                     messageField.setText("");
                 }
             }
@@ -100,8 +115,24 @@ public class ChatApp2 extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            ChatApp2 chatApp = new ChatApp2();
-            chatApp.setVisible(true);
+            ChatApp2 chatApp2 = new ChatApp2();
+            chatApp2.setVisible(true);
+
+            // Start a new thread for receiving messages
+            new Thread(() -> {
+                BufferedReader bufferedReader = chatApp2.client.getBufferedReader();
+                MessageReceiver messageReceiver = new MessageReceiver(bufferedReader);
+                while (true) {
+                    // Receive message
+                    messageReceiver.receive();
+                    System.out.println(messageReceiver.getMessage());
+                    // Update GUI with received message
+                    SwingUtilities.invokeLater(() -> {
+                        chatApp2.addMessage("Friend", messageReceiver.getMessage(), false);
+                    });
+                }
+            }).start();
         });
     }
+
 }
