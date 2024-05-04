@@ -1,0 +1,23 @@
+indriver.com.		300	IN	TXT	"v=spf1 include:mxsspf.sendpulse.com include:spf.mandrillapp.com include:amazonses.com include:_spf.google.com +a +mx ~all"
+indriver.com.		300	IN	TXT	"MS=89BC18AC3D6ACE8E115D5B88EECBE72553AC5C45"
+indriver.com.		300	IN	TXT	"wrike-verification=MzUwODIzNTo5YzY4OGQ3OTNjNDcyYzdjNzhjODY2YjE4NzBlMTViZTE5ZDI1YzdjNjNiNWYwNDE4N2I0NTEzMmI2ZmRiYWQ0"
+indriver.com.		300	IN	TXT	"h1-domain-verification=MV4eqnxiqAJDi6xpPf6PQmfUygfQSiv7qH4DYj2XdEHpdFX9"
+indriver.com.		300	IN	TXT	"mandrill_verify.fXaqCj8jFNrKV-47UHXapA"
+indriver.com.		300	IN	TXT	"google-site-verification=Vni4qLctd6vc2AY8RBzBKDHq1WYaGGKqSBMQwT7ebPs"
+indriver.com.		300	IN	TXT	"miro-verification=6fb5d94547e2faf5699dd9b65349835d7a80fec8"
+indriver.com.		300	IN	TXT	"apple-domain-verification=I12eCZiMvaPyo2SF"
+indriver.com.		300	IN	TXT	"MS=ms61443695"
+indriver.com.		300	IN	TXT	"twilio-domain-verification=a9d89220f8434657af424fd3d2271df7"
+indriver.com.		300	IN	TXT	"yandex-verification: 084c172e69109164"
+indriver.com.		300	IN	TXT	"wrike-verification=NjA2MjE4NTpjNzI4ZTdkNzMwNmUwN2U2N2RkNGVhYjQ0MjA0OTMxMjI5MmI0ODRmYmQ4NTg3OGNkNThkYjc2ZDY4NGE5Mjk3"
+indriver.com.		300	IN	MX	13 alt3.aspmx.l.google.com.
+indriver.com.		300	IN	MX	14 alt4.aspmx.l.google.com.
+indriver.com.		300	IN	MX	11 alt1.aspmx.l.google.com.
+indriver.com.		300	IN	MX	10 aspmx.l.google.com.
+indriver.com.		300	IN	MX	12 alt2.aspmx.l.google.com.
+indriver.com.		21600	IN	SOA	ns-cloud-e1.googledomains.com. cloud-dns-hostmaster.google.com. 1 21600 3600 259200 300
+indriver.com.		21600	IN	NS	ns-cloud-e3.googledomains.com.
+indriver.com.		21600	IN	NS	ns-cloud-e2.googledomains.com.
+indriver.com.		21600	IN	NS	ns-cloud-e4.googledomains.com.
+indriver.com.		21600	IN	NS	ns-cloud-e1.googledomains.com.
+indriver.com.		60	IN	A	185.104.210.6
