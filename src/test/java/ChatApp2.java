@@ -2,8 +2,7 @@ import org.example.chatbox.app.SocketHandler;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.io.*;
 
 public class ChatApp2 extends JFrame {
@@ -43,19 +42,18 @@ public class ChatApp2 extends JFrame {
         sendButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String message = messageField.getText();
-                if (!message.isEmpty()) {
-                    addMessage("You", message, true);
-                    try {
-                        MessageSender messageSender = new MessageSender(client.getBufferedWriter());
-                        messageSender.setMessage(messageField.getText());
-                        messageSender.send();
-                    } catch (IOException ex) {
-                        throw new RuntimeException(ex);
-                    }
-                    messageField.setText("");
+                sendMsg();
+            }
+        });
+        messageField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    System.out.println("key pressed");
+                    sendMsg();
                 }
             }
+
         });
         inputPanel.add(sendButton, BorderLayout.EAST);
 
@@ -75,7 +73,20 @@ public class ChatApp2 extends JFrame {
 
         add(inputPanel, BorderLayout.SOUTH);
     }
-
+ void sendMsg(){
+     String message = messageField.getText();
+     if (!message.isEmpty()) {
+         addMessage("You", message, true);
+         try {
+             MessageSender messageSender = new MessageSender(client.getBufferedWriter());
+             messageSender.setMessage(messageField.getText());
+             messageSender.send();
+         } catch (IOException ex) {
+             throw new RuntimeException(ex);
+         }
+         messageField.setText("");
+     }
+ }
     private void addMessage(String sender, String message, boolean isSender) {
         JPanel messagePanel = new JPanel();
         messagePanel.setLayout(new BorderLayout());
