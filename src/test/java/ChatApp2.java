@@ -9,14 +9,8 @@ public class ChatApp2 extends JFrame {
     private JPanel chatPanel;
     private JTextField messageField;
     BufferedWriter bufferedWriter;
-    SocketHandler client  ;
 
     public ChatApp2()  {
-        try {
-            client = new SocketHandler(12345);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
         setTitle("Chat App");
         setSize(600, 400);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -137,8 +131,9 @@ public class ChatApp2 extends JFrame {
                 throw new RuntimeException(e);
             }
             chatApp2.setBufferedWriter(client.getBufferedWriter());
-            // Start a new thread for receiving messages
-            SocketHandler finalClient = client;
+
+            // MessageThread
+          final SocketHandler finalClient = client;
             new Thread(() -> {
                 BufferedReader bufferedReader = finalClient.getBufferedReader();
                 MessageReceiver messageReceiver = new MessageReceiver(bufferedReader);
@@ -157,6 +152,20 @@ public class ChatApp2 extends JFrame {
 
 
 
+            }).start();
+
+            SocketHandler fileSocket = null;
+            try {
+                fileSocket = new SocketHandler(12346);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            SocketHandler finalFileSocket = fileSocket;
+            new Thread(()->{
+                  while(true){
+                      FileReceiver fileReceiver = new FileReceiver(finalFileSocket.getInputStream());
+                      fileReceiver.receive();
+                  }
             }).start();
 
         });

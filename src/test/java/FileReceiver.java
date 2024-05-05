@@ -15,8 +15,19 @@ public class FileReceiver {
      }
 
      public void receive(){
+         DataInputStream dataInputStream = new DataInputStream(inputStream);
+         System.out.println("receiving...");
+             // Receive the filename from the client
+         String filename = null;
+         try {
+             filename = dataInputStream.readUTF();
+             System.out.println(filename);
+         } catch (IOException e) {
+             throw new RuntimeException(e);
+         }
          savePath = saveDir+"/"+filename;
-         try (FileOutputStream fileOutputStream = new FileOutputStream(savePath)) {
+         try  {
+             FileOutputStream fileOutputStream = new FileOutputStream(savePath);
              byte[] buffer = new byte[1024];
              int bytesRead;
              while ((bytesRead = inputStream.read(buffer)) != -1) {

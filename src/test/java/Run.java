@@ -1,10 +1,12 @@
+import org.example.chatbox.app.SocketHandler;
+
 import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 
 public class Run {
     public static void main(String[] args) {
-        //FileReceiver fileReceiver = new FileReceiver(System.in);
+
          runApp();
 
     }
@@ -12,20 +14,32 @@ public class Run {
         SwingUtilities.invokeLater(() -> {
             ChatApp2 chatApp2 = new ChatApp2();
             chatApp2.setVisible(true);
+            SocketHandler client = null;
+            try {
+                client = new SocketHandler(12345);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            chatApp2.setBufferedWriter(client.getBufferedWriter());
 
             // Start a new thread for receiving messages
+            final SocketHandler finalClient = client;
             new Thread(() -> {
-                BufferedReader bufferedReader = chatApp2.client.getBufferedReader();
+                BufferedReader bufferedReader = finalClient.getBufferedReader();
                 MessageReceiver messageReceiver = new MessageReceiver(bufferedReader);
                 while (true) {
                     // Receive message
-                      messageReceiver.receive();
-                        System.out.println(messageReceiver.getMessage());
-                        // Update GUI with received message
-                        SwingUtilities.invokeLater(() -> {
-                            chatApp2.addMessage("Friend", messageReceiver.getMessage(), false);
-                        });
+                    if(!messageReceiver.receive()) {
+                        break;
+
                     }
+                    System.out.println(messageReceiver.getMessage());
+                    // Update GUI with received message
+                    SwingUtilities.invokeLater(() -> {
+                        chatApp2.addMessage("Friend", messageReceiver.getMessage(), false);
+                    });
+                }
+
 
 
             }).start();
