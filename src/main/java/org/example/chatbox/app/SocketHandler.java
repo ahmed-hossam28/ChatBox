@@ -14,10 +14,18 @@ public class SocketHandler {
     OutputStream outputStream;
     OutputStreamWriter outputStreamWriter;
     BufferedWriter bufferedWriter;
-   public SocketHandler() throws IOException {
-         socket = new Socket("0.tcp.eu.ngrok.io",this.port);
-         initDataCommunication();
-    }
+   public SocketHandler() {
+       try {
+           socket = new Socket("0.tcp.eu.ngrok.io",this.port);
+       } catch (IOException e) {
+           System.err.println(e.getMessage());
+       }
+       try {
+           initDataCommunication();
+       } catch (IOException e) {
+           System.err.println(e.getMessage());
+       }
+   }
     public void  initDataCommunication() throws IOException {
         inputStream = this.socket.getInputStream();
         inputStreamReader = new InputStreamReader(inputStream);

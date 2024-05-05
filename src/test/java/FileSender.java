@@ -23,7 +23,7 @@ public class FileSender implements DataSender {
             String filename = file.getName();
             FileInputStream fileInputStream = new FileInputStream(file);
             DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
-            dataOutputStream.writeUTF("FILE:"+filename);
+            dataOutputStream.writeUTF(filename);
             byte[] buffer = new byte[1024];
             int bytesRead;
             while ((bytesRead = fileInputStream.read(buffer)) != -1) {

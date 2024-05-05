@@ -80,7 +80,7 @@ public class ChatApp extends JFrame {
             addMessage("You", message, true);
             try {
                 MessageSender messageSender = new MessageSender(server.getBufferedWriter());
-                messageSender.setMessage("MSG:"+messageField.getText());
+                messageSender.setMessage(messageField.getText());
                 messageSender.send();
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
@@ -141,7 +141,8 @@ public class ChatApp extends JFrame {
                             MessageReceiver messageReceiver = new MessageReceiver(bufferedReader);
                             while (true) {
                                 // Receive message
-                                messageReceiver.receive();
+                                if(!messageReceiver.receive())
+                                      break;
                                 System.out.println(messageReceiver.getMessage());
                                 // Update GUI with received message
                                 SwingUtilities.invokeLater(() -> {

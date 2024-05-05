@@ -8,6 +8,7 @@ import java.io.*;
 public class ChatApp2 extends JFrame {
     private JPanel chatPanel;
     private JTextField messageField;
+    BufferedWriter bufferedWriter;
     SocketHandler client  ;
 
     public ChatApp2()  {
@@ -73,13 +74,13 @@ public class ChatApp2 extends JFrame {
 
         add(inputPanel, BorderLayout.SOUTH);
     }
- void sendMsg(){
+    public void sendMsg(){
      String message = messageField.getText();
      if (!message.isEmpty()) {
          addMessage("You", message, true);
          try {
-             MessageSender messageSender = new MessageSender(client.getBufferedWriter());
-             messageSender.setMessage("MSG:"+messageField.getText());
+             MessageSender messageSender = new MessageSender(this.bufferedWriter);
+             messageSender.setMessage(messageField.getText());
              messageSender.send();
          } catch (IOException ex) {
              throw new RuntimeException(ex);
@@ -121,39 +122,46 @@ public class ChatApp2 extends JFrame {
     private void sendFile(File file) {
         System.out.println("Sending file: " + file.getName());
     }
+   public void setBufferedWriter(BufferedWriter bufferedWriter){
+        this.bufferedWriter = bufferedWriter;
+   }
 
-    public static void main(String[] args) {
+    static void runApp(){
         SwingUtilities.invokeLater(() -> {
             ChatApp2 chatApp2 = new ChatApp2();
             chatApp2.setVisible(true);
-
+            SocketHandler client = null;
+            try {
+                client = new SocketHandler(12345);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            chatApp2.setBufferedWriter(client.getBufferedWriter());
             // Start a new thread for receiving messages
+            SocketHandler finalClient = client;
             new Thread(() -> {
-                BufferedReader bufferedReader = chatApp2.client.getBufferedReader();
+                BufferedReader bufferedReader = finalClient.getBufferedReader();
                 MessageReceiver messageReceiver = new MessageReceiver(bufferedReader);
                 while (true) {
                     // Receive message
-                    if(messageReceiver.receive()){
-                        System.out.println(messageReceiver.getMessage());
-                        // Update GUI with received message
-                        SwingUtilities.invokeLater(() -> {
-                            chatApp2.addMessage("Friend", messageReceiver.getMessage(), false);
-                        });
-                    }
-                    else{
-                        System.out.println(messageReceiver.getMessage());
-                        FileReceiver receiver = new FileReceiver(chatApp2.client.getInputStream());
-
-                           // receiver.setFilename(messageReceiver.getMessage().substring(5));
-                            receiver.receive();
-
+                    if(!messageReceiver.receive()) {
+                        break;
 
                     }
-
+                    System.out.println(messageReceiver.getMessage());
+                    // Update GUI with received message
+                    SwingUtilities.invokeLater(() -> {
+                        chatApp2.addMessage("Friend", messageReceiver.getMessage(), false);
+                    });
                 }
+
+
             }).start();
 
         });
+    }
+    public static void main(String[] args) {
+        runApp();
     }
 
 }

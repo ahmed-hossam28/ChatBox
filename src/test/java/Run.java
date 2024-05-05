@@ -19,24 +19,15 @@ public class Run {
                 MessageReceiver messageReceiver = new MessageReceiver(bufferedReader);
                 while (true) {
                     // Receive message
-                    if(messageReceiver.receive()){
+                      messageReceiver.receive();
                         System.out.println(messageReceiver.getMessage());
                         // Update GUI with received message
                         SwingUtilities.invokeLater(() -> {
                             chatApp2.addMessage("Friend", messageReceiver.getMessage(), false);
                         });
                     }
-                    else{
-                        System.out.println(messageReceiver.getMessage());
-                        FileReceiver receiver = new FileReceiver(chatApp2.client.getInputStream());
-
-                        // receiver.setFilename(messageReceiver.getMessage().substring(5));
-                        receiver.receive();
 
 
-                    }
-
-                }
             }).start();
 
         });
