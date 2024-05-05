@@ -9,12 +9,19 @@ public class MessageReceiver {
         this.bufferedReader = bufferedReader;
     }
 
-    public void receive(){
+    public boolean receive(){
         try {
             message = bufferedReader.readLine();
+            if(message!=null){
+                if(message.startsWith("MSG:")){
+                     message = message.substring(4);
+                }else return false;
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        return true;
     }
 
     public String getMessage() {

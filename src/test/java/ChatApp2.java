@@ -12,7 +12,7 @@ public class ChatApp2 extends JFrame {
 
     public ChatApp2()  {
         try {
-            client = new SocketHandler();
+            client = new SocketHandler(12345);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -79,7 +79,7 @@ public class ChatApp2 extends JFrame {
          addMessage("You", message, true);
          try {
              MessageSender messageSender = new MessageSender(client.getBufferedWriter());
-             messageSender.setMessage(messageField.getText());
+             messageSender.setMessage("MSG:"+messageField.getText());
              messageSender.send();
          } catch (IOException ex) {
              throw new RuntimeException(ex);
@@ -87,7 +87,7 @@ public class ChatApp2 extends JFrame {
          messageField.setText("");
      }
  }
-    private void addMessage(String sender, String message, boolean isSender) {
+    public void addMessage(String sender, String message, boolean isSender) {
         JPanel messagePanel = new JPanel();
         messagePanel.setLayout(new BorderLayout());
         messagePanel.setBackground(isSender ? new Color(173, 216, 230) : Color.LIGHT_GRAY);
@@ -119,8 +119,6 @@ public class ChatApp2 extends JFrame {
     }
 
     private void sendFile(File file) {
-        // You can implement the file sending logic here
-        // For demonstration, we'll just print the file name
         System.out.println("Sending file: " + file.getName());
     }
 
@@ -135,14 +133,26 @@ public class ChatApp2 extends JFrame {
                 MessageReceiver messageReceiver = new MessageReceiver(bufferedReader);
                 while (true) {
                     // Receive message
-                    messageReceiver.receive();
-                    System.out.println(messageReceiver.getMessage());
-                    // Update GUI with received message
-                    SwingUtilities.invokeLater(() -> {
-                        chatApp2.addMessage("Friend", messageReceiver.getMessage(), false);
-                    });
+                    if(messageReceiver.receive()){
+                        System.out.println(messageReceiver.getMessage());
+                        // Update GUI with received message
+                        SwingUtilities.invokeLater(() -> {
+                            chatApp2.addMessage("Friend", messageReceiver.getMessage(), false);
+                        });
+                    }
+                    else{
+                        System.out.println(messageReceiver.getMessage());
+                        FileReceiver receiver = new FileReceiver(chatApp2.client.getInputStream());
+
+                           // receiver.setFilename(messageReceiver.getMessage().substring(5));
+                            receiver.receive();
+
+
+                    }
+
                 }
             }).start();
+
         });
     }
 

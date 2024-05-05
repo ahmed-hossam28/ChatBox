@@ -1,23 +1,21 @@
 import java.io.*;
 
 public class FileReceiver {
-    String saveDir = "received_files/";
+    String saveDir = "received_files";
      InputStream inputStream;
      File file;
      String filename;
      String savePath;
    public  FileReceiver(InputStream inputStream){
          this.inputStream = inputStream;
+         File dir = new File(saveDir);
+         if(!dir.exists()){
+             dir.mkdirs();
+         }
      }
 
      public void receive(){
-         DataInputStream dataInputStream = new DataInputStream(inputStream);
-         try {
-             filename = dataInputStream.readUTF();
-         } catch (IOException e) {
-             throw new RuntimeException(e);
-         }
-         savePath = saveDir+filename;
+         savePath = saveDir+"/"+filename;
          try (FileOutputStream fileOutputStream = new FileOutputStream(savePath)) {
              byte[] buffer = new byte[1024];
              int bytesRead;
@@ -25,13 +23,17 @@ public class FileReceiver {
                  fileOutputStream.write(buffer, 0, bytesRead);
              }
              System.out.println("File received and saved successfully");
-             file = new File(savePath);
+            // file = new File(savePath);
          }
          catch (IOException e) {
              throw new RuntimeException(e);
          }
 
      }
+
+    public void setFilename(String filename) {
+        this.filename = filename;
+    }
 
     public File getFile() {
         return file;

@@ -80,7 +80,7 @@ public class ChatApp extends JFrame {
             addMessage("You", message, true);
             try {
                 MessageSender messageSender = new MessageSender(server.getBufferedWriter());
-                messageSender.setMessage(messageField.getText());
+                messageSender.setMessage("MSG:"+messageField.getText());
                 messageSender.send();
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
@@ -123,6 +123,8 @@ public class ChatApp extends JFrame {
     public void sendFile(File file) {
         // You can implement the file sending logic here
         // For demonstration, we'll just print the file name
+        FileSender fileSender = new FileSender(file,server.getOutputStream());
+        fileSender.send();
         System.out.println("Sending file: " + file.getName());
     }
 
@@ -130,26 +132,31 @@ public class ChatApp extends JFrame {
         SwingUtilities.invokeLater(() -> {
             ChatApp chatApp = new ChatApp();
             chatApp.setVisible(true);
-            try {
-                chatApp.server.start();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
-            // Start a thread to continuously receive messages
-            new Thread(() -> {
-                BufferedReader bufferedReader = chatApp.server.getBufferedReader();
-                MessageReceiver messageReceiver = new MessageReceiver(bufferedReader);
-                while (true) {
-                    // Receive message
-                    messageReceiver.receive();
-                    System.out.println(messageReceiver.getMessage());
-                    // Update GUI with received message
-                    SwingUtilities.invokeLater(() -> {
-                        chatApp.addMessage("Friend", messageReceiver.getMessage(), false);
-                    });
+            new Thread(()-> {
+                try {
+                    while (true) {
+                        chatApp.server.start();
+                        new Thread(() -> {
+                            BufferedReader bufferedReader = chatApp.server.getBufferedReader();
+                            MessageReceiver messageReceiver = new MessageReceiver(bufferedReader);
+                            while (true) {
+                                // Receive message
+                                messageReceiver.receive();
+                                System.out.println(messageReceiver.getMessage());
+                                // Update GUI with received message
+                                SwingUtilities.invokeLater(() -> {
+                                    chatApp.addMessage("Friend", messageReceiver.getMessage(), false);
+                                });
+                            }
+                        }).start();
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
             }).start();
+
+            // Start a thread to continuously receive messages
+
         });
     }
 
