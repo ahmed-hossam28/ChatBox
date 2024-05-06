@@ -1,16 +1,21 @@
 package Message;
 
-import java.io.*;
+import data.DataSender;
 
-public class MessageSender {
+import java.io.*;
+public class MessageSender implements DataSender {
   private   BufferedWriter bufferedWriter;
   private   String message;
-
   public MessageSender(BufferedWriter bufferedWriter) throws IOException {
         this.bufferedWriter = bufferedWriter;
     }
 
-    //@Override
+     public MessageSender(BufferedWriter bufferedWriter , String message) throws IOException {
+            this.bufferedWriter = bufferedWriter;
+            this.message = message;
+        }
+
+        @Override
     public boolean send() {
         try {
             bufferedWriter.write(message);

@@ -4,12 +4,13 @@ import Message.MessageReceiver;
 import Message.MessageSender;
 import File.FileReceiver;
 import File.FileSender;
-import org.example.chatbox.app.SocketHandler;
+import org.example.chatbox.sockets.SocketHandler;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.net.Socket;
 
 public class ChatApp2 extends JFrame {
     private JPanel chatPanel;
@@ -134,12 +135,13 @@ public class ChatApp2 extends JFrame {
             SocketHandler client = null;
             try {
                 client = new SocketHandler(12345);
+                //client = new SocketHandler(new Socket("0.tcp.eu.ngrok.io",19657));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
             chatApp2.setBufferedWriter(client.getBufferedWriter());
+            final SocketHandler finalClient = client;
             // MessageThread
-          final SocketHandler finalClient = client;
             new Thread(() -> {
                 BufferedReader bufferedReader = finalClient.getBufferedReader();
                 MessageReceiver messageReceiver = new MessageReceiver(bufferedReader);
@@ -163,14 +165,16 @@ public class ChatApp2 extends JFrame {
 
             SocketHandler fileSocket = null;
             try {
-                fileSocket = new SocketHandler(12346);
+                //fileSocket = new SocketHandler(12346);
+                fileSocket = new SocketHandler(new Socket("4.tcp.eu.ngrok.io",16732));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
 
+
             SocketHandler finalFileSocket = fileSocket;
             chatApp2.setFileOutputStream(finalFileSocket.getOutputStream());
-
+            //file receiver thread
             new Thread(()->{
                 FileReceiver fileReceiver = new FileReceiver(finalFileSocket.getInputStream());
                 fileReceiver.start();

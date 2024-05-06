@@ -1,6 +1,6 @@
 import Message.MessageReceiver;
 import app.ChatApp2;
-import org.example.chatbox.app.SocketHandler;
+import org.example.chatbox.sockets.SocketHandler;
 
 import javax.swing.*;
 import java.io.BufferedReader;

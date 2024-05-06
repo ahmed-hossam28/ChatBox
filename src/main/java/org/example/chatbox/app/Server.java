@@ -1,5 +1,7 @@
 package org.example.chatbox.app;
 
+import org.example.chatbox.sockets.ServerSocketHandler;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -14,7 +16,7 @@ public class Server extends JFrame {
     private JTextField messageField;
     private JButton sendButton;
     private String username;
-    private  ServerSocketHandler server;
+    private ServerSocketHandler server;
     ArrayList<String>messages;
     public Server(String username) {
         try {
@@ -87,7 +89,6 @@ public class Server extends JFrame {
 
         //send to client
         //for (String s : messages)
-            server.send(message);
 
         System.out.println("message sent");
 

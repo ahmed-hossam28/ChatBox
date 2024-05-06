@@ -1,4 +1,6 @@
 package org.example.chatbox.app;
+import org.example.chatbox.sockets.SocketHandler;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;

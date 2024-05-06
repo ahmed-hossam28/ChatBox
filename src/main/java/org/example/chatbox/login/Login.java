@@ -122,14 +122,12 @@ public class Login extends JFrame {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    Login loginApp = new Login();
-                    loginApp.connectToDatabase();
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
+        SwingUtilities.invokeLater(() -> {
+            try {
+                Login loginApp = new Login();
+                loginApp.connectToDatabase();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
             }
         });
     }

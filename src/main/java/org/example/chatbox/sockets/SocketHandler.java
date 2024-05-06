@@ -1,10 +1,10 @@
-package org.example.chatbox.app;
+package org.example.chatbox.sockets;
 
 import java.io.*;
 import java.net.Socket;
 
 public class SocketHandler {
-    String host;
+    String host = "ip address";
     int port = 17413;
     Socket socket;
     InputStream inputStream;
@@ -16,17 +16,18 @@ public class SocketHandler {
     BufferedWriter bufferedWriter;
    public SocketHandler() {
        try {
-           socket = new Socket("0.tcp.eu.ngrok.io",this.port);
+           socket = new Socket("0.tcp.eu.ngrok.io",this.port);//
        } catch (IOException e) {
            System.err.println(e.getMessage());
        }
        try {
-           initDataCommunication();
+           initDataCommunication();//
        } catch (IOException e) {
            System.err.println(e.getMessage());
        }
    }
-    public void  initDataCommunication() throws IOException {
+
+   public void  initDataCommunication() throws IOException {
         inputStream = this.socket.getInputStream();
         inputStreamReader = new InputStreamReader(inputStream);
         bufferedReader = new BufferedReader(inputStreamReader);
@@ -35,6 +36,7 @@ public class SocketHandler {
         outputStreamWriter  = new OutputStreamWriter(outputStream);
         bufferedWriter = new BufferedWriter(outputStreamWriter);
     }
+
   public  SocketHandler(Socket socket){
        this.socket = socket;
         try {
@@ -43,6 +45,9 @@ public class SocketHandler {
             System.err.println(e.getMessage());
         }
     }
+
+
+
     public SocketHandler(int port) throws IOException {
         socket = new Socket("localhost",port);
         initDataCommunication();

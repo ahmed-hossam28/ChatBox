@@ -1,4 +1,4 @@
-package org.example.chatbox.app;
+package org.example.chatbox.sockets;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -25,9 +25,10 @@ public class ServerSocketHandler {
     }
     public void start() throws IOException {
         System.out.println("waiting....");
-          client =   serverSocket.accept();//return socket //block waiting for connection
+          client =   serverSocket.accept();//return socket  waiting//block waiting for connection
         System.out.println("[+] connection from "+client);
           //input
+
           inputStream = client.getInputStream();
           inputStreamReader = new InputStreamReader(inputStream);
           bufferedReader = new BufferedReader(inputStreamReader);
@@ -38,10 +39,10 @@ public class ServerSocketHandler {
 
     }
 
-    String receive() throws IOException {
+  public  String receive() throws IOException {
       return bufferedReader.readLine();
     }
-    void send(String msg)throws IOException{
+  public void send(String msg)throws IOException{
       bufferedWriter.write(msg);
       bufferedWriter.newLine();
       bufferedWriter.flush();

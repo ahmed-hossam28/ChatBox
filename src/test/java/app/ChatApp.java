@@ -4,7 +4,7 @@ import Message.MessageReceiver;
 import Message.MessageSender;
 import File.FileReceiver;
 import File.FileSender;
-import org.example.chatbox.app.ServerSocketHandler;
+import org.example.chatbox.sockets.ServerSocketHandler;
 
 import javax.swing.*;
 import java.awt.*;
@@ -134,11 +134,7 @@ public class ChatApp extends JFrame {
     }
 
 
-
-
-
-
-   static  void runApp(){
+   static void runApp(){
        SwingUtilities.invokeLater(() -> {
            ChatApp chatApp = new ChatApp();
            chatApp.setVisible(true);
@@ -180,7 +176,7 @@ public class ChatApp extends JFrame {
                        System.err.println("file :"+e.getMessage());
                    }
 
-                   //receiving files
+                   //receiving files thread
                    new Thread(()->{
                        FileReceiver fileReceiver = new FileReceiver(chatApp.fileServer.getInputStream());
                        fileReceiver.start();
