@@ -52,7 +52,6 @@ public class ChatApp extends JFrame {
             @Override
             public void keyPressed(KeyEvent e) {
                 if(e.getKeyCode() == KeyEvent.VK_ENTER){
-                    System.out.println("key pressed");
                     sendMsg();
                 }
             }
@@ -151,7 +150,7 @@ public class ChatApp extends JFrame {
                                // Receive message
                                if(!messageReceiver.receive())
                                    break;
-                               System.out.println(messageReceiver.getMessage());
+                              // System.out.println(messageReceiver.getMessage());
                                // Update GUI with received message
                                SwingUtilities.invokeLater(() -> {
                                    chatApp.addMessage("Friend", messageReceiver.getMessage(), false);

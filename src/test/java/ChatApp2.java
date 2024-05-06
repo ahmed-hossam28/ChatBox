@@ -44,7 +44,6 @@ public class ChatApp2 extends JFrame {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    System.out.println("key pressed");
                     sendMsg();
                 }
             }
@@ -137,13 +136,14 @@ public class ChatApp2 extends JFrame {
             new Thread(() -> {
                 BufferedReader bufferedReader = finalClient.getBufferedReader();
                 MessageReceiver messageReceiver = new MessageReceiver(bufferedReader);
+                messageReceiver.start();
                 while (true) {
                     // Receive message
                     if(!messageReceiver.receive()) {
                         break;
 
                     }
-                    System.out.println(messageReceiver.getMessage());
+                    //System.out.println(messageReceiver.getMessage());
                     // Update GUI with received message
                     SwingUtilities.invokeLater(() -> {
                         chatApp2.addMessage("Friend", messageReceiver.getMessage(), false);
@@ -162,9 +162,12 @@ public class ChatApp2 extends JFrame {
             }
             SocketHandler finalFileSocket = fileSocket;
             new Thread(()->{
+                FileReceiver fileReceiver = new FileReceiver(finalFileSocket.getInputStream());
+                fileReceiver.start();
                   while(true){
-                      FileReceiver fileReceiver = new FileReceiver(finalFileSocket.getInputStream());
-                      fileReceiver.receive();
+                      if(fileReceiver.receive())
+                          JOptionPane.showMessageDialog(chatApp2,fileReceiver.getFilename()+"Received!");
+                      else break;
                   }
             }).start();
 

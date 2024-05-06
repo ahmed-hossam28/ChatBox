@@ -6,6 +6,7 @@ public class FileReceiver {
      File file;
      String filename;
      String savePath;
+     long fileSize;
    public  FileReceiver(InputStream inputStream){
          this.inputStream = inputStream;
          File dir = new File(saveDir);
@@ -13,33 +14,58 @@ public class FileReceiver {
              dir.mkdirs();
          }
      }
-
-     public void receive(){
+    void sleep(){
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public void start(){
+        sleep();
+        System.out.println("receiving files starts");
+        sleep();
+        System.out.println("receiving files....");
+    }
+     public boolean receive(){
          DataInputStream dataInputStream = new DataInputStream(inputStream);
-         System.out.println("receiving...");
-             // Receive the filename from the client
+
+         // Receive the filename from the client
          String filename = null;
          try {
              filename = dataInputStream.readUTF();
+             long fileSize = dataInputStream.readLong();
+             this.filename = filename;
+             this.fileSize = fileSize;
              System.out.println(filename);
          } catch (IOException e) {
-             throw new RuntimeException(e);
+            // System.err.println(e.getMessage());
+             return false;
          }
          savePath = saveDir+"/"+filename;
          try  {
              FileOutputStream fileOutputStream = new FileOutputStream(savePath);
              byte[] buffer = new byte[1024];
              int bytesRead;
-             while ((bytesRead = inputStream.read(buffer)) != -1) {
+             long bytesReceived = 0;
+             while (bytesReceived< this.fileSize && (bytesRead = inputStream.read(buffer)) != -1) {
                  fileOutputStream.write(buffer, 0, bytesRead);
+                 bytesReceived+=bytesRead;
              }
-             System.out.println("File received and saved successfully");
+             if(bytesReceived!=this.fileSize){
+                 System.err.println("Incomplete file received");
+             }
+             else {
+                 System.out.println("File received and saved successfully");
+                 return true;
+             }
             // file = new File(savePath);
          }
          catch (IOException e) {
-             throw new RuntimeException(e);
+             System.err.println(e.getMessage());
+             return false;
          }
-
+         return true;
      }
 
     public void setFilename(String filename) {

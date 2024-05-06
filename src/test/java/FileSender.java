@@ -21,11 +21,13 @@ public class FileSender implements DataSender {
     public boolean send() {
         try {
             String filename = file.getName();
+            long fileSize = file.length();
             FileInputStream fileInputStream = new FileInputStream(file);
             DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
 
             // Write filename to the output stream
             dataOutputStream.writeUTF(filename);
+            dataOutputStream.writeLong(fileSize);
 
             // Write file contents to the output stream
             byte[] buffer = new byte[1024];
@@ -34,10 +36,10 @@ public class FileSender implements DataSender {
                 outputStream.write(buffer, 0, bytesRead);
             }
 
+           fileInputStream.close();
             // Flush and close streams
-            fileInputStream.close();
             dataOutputStream.flush();
-            dataOutputStream.close();
+            outputStream.flush();
 
             //System.out.println("File " + filename + " sent successfully");
             return true;

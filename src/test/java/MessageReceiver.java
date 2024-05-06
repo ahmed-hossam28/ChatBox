@@ -9,7 +9,14 @@ public class MessageReceiver {
         this.bufferedReader = bufferedReader;
     }
 
+    public void start(){
+        sleep();
+        System.out.println("receiving messages starts");
+        sleep();
+        System.out.println("receiving messages...");
+    }
     public boolean receive(){
+
         try {
             message = bufferedReader.readLine();
             if(message==null){
@@ -32,5 +39,13 @@ public class MessageReceiver {
 
     public void setBufferedReader(BufferedReader bufferedReader) {
         this.bufferedReader = bufferedReader;
+    }
+
+    void sleep(){
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
