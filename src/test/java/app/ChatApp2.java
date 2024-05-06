@@ -1,3 +1,9 @@
+package app;
+
+import Message.MessageReceiver;
+import Message.MessageSender;
+import File.FileReceiver;
+import File.FileSender;
 import org.example.chatbox.app.SocketHandler;
 
 import javax.swing.*;
@@ -9,9 +15,9 @@ public class ChatApp2 extends JFrame {
     private JPanel chatPanel;
     private JTextField messageField;
     BufferedWriter bufferedWriter;
-
+    OutputStream fileOutputStream;
     public ChatApp2()  {
-        setTitle("Chat App");
+        setTitle("Chat App2");
         setSize(600, 400);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
@@ -113,12 +119,14 @@ public class ChatApp2 extends JFrame {
     }
 
     private void sendFile(File file) {
+        FileSender fileSender = new FileSender(file,fileOutputStream);
+        fileSender.send();
         System.out.println("Sending file: " + file.getName());
     }
    public void setBufferedWriter(BufferedWriter bufferedWriter){
         this.bufferedWriter = bufferedWriter;
    }
-
+   public void setFileOutputStream(OutputStream outputStream){this.fileOutputStream = outputStream;}
     static void runApp(){
         SwingUtilities.invokeLater(() -> {
             ChatApp2 chatApp2 = new ChatApp2();
@@ -130,7 +138,6 @@ public class ChatApp2 extends JFrame {
                 throw new RuntimeException(e);
             }
             chatApp2.setBufferedWriter(client.getBufferedWriter());
-
             // MessageThread
           final SocketHandler finalClient = client;
             new Thread(() -> {
@@ -160,7 +167,10 @@ public class ChatApp2 extends JFrame {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+
             SocketHandler finalFileSocket = fileSocket;
+            chatApp2.setFileOutputStream(finalFileSocket.getOutputStream());
+
             new Thread(()->{
                 FileReceiver fileReceiver = new FileReceiver(finalFileSocket.getInputStream());
                 fileReceiver.start();

@@ -1,3 +1,5 @@
+package File;
+
 import java.io.*;
 
 public class FileReceiver {
@@ -7,6 +9,7 @@ public class FileReceiver {
      String filename;
      String savePath;
      long fileSize;
+
    public  FileReceiver(InputStream inputStream){
          this.inputStream = inputStream;
          File dir = new File(saveDir);

@@ -1,4 +1,9 @@
-import org.example.chatbox.app.Server;
+package app;
+
+import Message.MessageReceiver;
+import Message.MessageSender;
+import File.FileReceiver;
+import File.FileSender;
 import org.example.chatbox.app.ServerSocketHandler;
 
 import javax.swing.*;
@@ -18,7 +23,7 @@ public class ChatApp extends JFrame {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        setTitle("Chat App");
+        setTitle("Chat App1");
         setSize(600, 400);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
@@ -174,6 +179,18 @@ public class ChatApp extends JFrame {
                    } catch (IOException e) {
                        System.err.println("file :"+e.getMessage());
                    }
+
+                   //receiving files
+                   new Thread(()->{
+                       FileReceiver fileReceiver = new FileReceiver(chatApp.fileServer.getInputStream());
+                       fileReceiver.start();
+                       while(true){
+                           if(fileReceiver.receive())
+                               JOptionPane.showMessageDialog(chatApp,fileReceiver.getFilename()+"Received!");
+                           else break;
+                       }
+                   }).start();
+
                }
            }).start();
 

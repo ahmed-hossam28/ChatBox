@@ -1,9 +1,8 @@
-import org.example.chatbox.app.SocketHandler;
+package Message;
 
 import java.io.*;
-import java.net.Socket;
 
-public class MessageSender implements DataSender {
+public class MessageSender {
   private   BufferedWriter bufferedWriter;
   private   String message;
 
@@ -11,7 +10,7 @@ public class MessageSender implements DataSender {
         this.bufferedWriter = bufferedWriter;
     }
 
-    @Override
+    //@Override
     public boolean send() {
         try {
             bufferedWriter.write(message);

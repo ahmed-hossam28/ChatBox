@@ -1,9 +1,8 @@
-import org.example.chatbox.app.SocketHandler;
+package File;
 
 import java.io.*;
-import java.net.Socket;
 
-public class FileSender implements DataSender {
+public class FileSender  {
 
      OutputStream outputStream;
      File file;
@@ -13,11 +12,10 @@ public class FileSender implements DataSender {
         this.outputStream = outputStream;
     }
 
-
     public void setFile(File file){
         this.file = file;
     }
-    @Override
+   // @Override
     public boolean send() {
         try {
             String filename = file.getName();
