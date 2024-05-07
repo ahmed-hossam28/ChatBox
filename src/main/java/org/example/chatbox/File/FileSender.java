@@ -1,6 +1,5 @@
-package File;
-
-import data.DataSender;
+package org.example.chatbox.File;
+import org.example.chatbox.data.DataSender;
 
 import java.io.*;
 

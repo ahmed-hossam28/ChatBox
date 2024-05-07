@@ -39,9 +39,13 @@ public class ServerSocketHandler {
 
     }
 
-  public  String receive() throws IOException {
-      return bufferedReader.readLine();
-    }
+  public  String receive()  {
+      try {
+          return bufferedReader.readLine();
+      } catch (IOException e) {
+          throw new RuntimeException(e);
+      }
+  }
   public void send(String msg)throws IOException{
       bufferedWriter.write(msg);
       bufferedWriter.newLine();

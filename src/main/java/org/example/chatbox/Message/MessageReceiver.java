@@ -1,4 +1,4 @@
-package Message;
+package org.example.chatbox.Message;
 
 import java.io.BufferedReader;
 import java.io.IOException;

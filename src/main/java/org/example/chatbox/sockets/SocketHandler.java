@@ -66,10 +66,16 @@ public class SocketHandler {
         this.port = port;
     }
 
-    public void send(String msg) throws IOException {
-        bufferedWriter.write(msg);
-        bufferedWriter.newLine();
-        bufferedWriter.flush();
+    public void send(String msg)  {
+
+        try {
+            bufferedWriter.write(msg);
+            bufferedWriter.newLine();
+            bufferedWriter.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     public String receive() throws IOException {

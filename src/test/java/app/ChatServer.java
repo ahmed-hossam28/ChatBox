@@ -1,22 +1,25 @@
 package app;
 
-import Message.MessageReceiver;
-import Message.MessageSender;
-import File.FileReceiver;
-import File.FileSender;
+import org.example.chatbox.Message.MessageSender;
+import org.example.chatbox.File.FileSender;
+import org.example.chatbox.pair.Pair;
 import org.example.chatbox.sockets.ServerSocketHandler;
+import org.example.chatbox.user.User;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.util.ArrayList;
 
-public class ChatApp extends JFrame {
+public class ChatServer extends JFrame {
+    ArrayList<Pair<User,Boolean>>users;
     private JPanel chatPanel;
     private JTextField messageField;
     ServerSocketHandler messageServer;
     ServerSocketHandler fileServer;
-    public ChatApp() {
+    public ChatServer() {
+        users = new ArrayList<>();
         try {
             messageServer = new ServerSocketHandler();
             fileServer = new ServerSocketHandler(12346);
@@ -69,7 +72,7 @@ public class ChatApp extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JFileChooser fileChooser = new JFileChooser();
-                int returnValue = fileChooser.showOpenDialog(ChatApp.this);
+                int returnValue = fileChooser.showOpenDialog(ChatServer.this);
                 if (returnValue == JFileChooser.APPROVE_OPTION) {
                     File selectedFile = fileChooser.getSelectedFile();
                     sendFile(selectedFile);
@@ -84,16 +87,43 @@ public class ChatApp extends JFrame {
         String message = messageField.getText();
         if (!message.isEmpty()) {
             addMessage("You", message, true);
-            try {
-                MessageSender messageSender = new MessageSender(messageServer.getBufferedWriter());
-                messageSender.setMessage(messageField.getText());
-                messageSender.send();
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
+
+           sendToMultipleUsers();
 
             messageField.setText("");
         }
+    }
+
+    void sendToMultipleUsers(){
+        try {
+           for(var user:users) {
+               MessageSender messageSender = new MessageSender(user.first.getSocketHandler().getBufferedWriter());
+               messageSender.setMessage(messageField.getText());
+
+              if(user.second) {
+                  if (!messageSender.send()) {
+                      System.out.println("[-] connection "+user.first.getName()+" at addr" +user.first.getSocketHandler().getSocket() + " has disconnected!");
+                      user.second = false;
+                  }
+              }
+           }
+
+           users.removeIf(user-> !user.second);
+
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    void sendToSingleUser(){
+        MessageSender messageSender = null;
+        try {
+            messageSender = new MessageSender(messageServer.getBufferedWriter());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        messageSender.setMessage(messageField.getText());
+        messageSender.send();
     }
     public void addMessage(String sender, String message, boolean isSender) {
         JPanel messagePanel = new JPanel();
@@ -133,67 +163,5 @@ public class ChatApp extends JFrame {
         System.out.println("Sending file: " + file.getName());
     }
 
-
-   static void runApp(){
-       SwingUtilities.invokeLater(() -> {
-           ChatApp chatApp = new ChatApp();
-           chatApp.setVisible(true);
-
-           //MessageThread
-           new Thread(()-> {
-               try {
-                   while (true) {
-                       chatApp.messageServer.start();
-                       new Thread(() -> {
-                           BufferedReader bufferedReader = chatApp.messageServer.getBufferedReader();
-                           MessageReceiver messageReceiver = new MessageReceiver(bufferedReader);
-                           while (true) {
-                               // Receive message
-                               if(!messageReceiver.receive())
-                                   break;
-                              // System.out.println(messageReceiver.getMessage());
-                               // Update GUI with received message
-                               SwingUtilities.invokeLater(() -> {
-                                   chatApp.addMessage("Friend", messageReceiver.getMessage(), false);
-                               });
-                           }
-                       }).start();
-                   }
-               } catch (IOException e) {
-                   throw new RuntimeException(e);
-               }
-           }).start();
-
-
-           //FileThread
-           new Thread(()->{
-               while(true){
-                   try {
-                       System.out.print("FILE:");
-                       chatApp.fileServer.start();
-
-                   } catch (IOException e) {
-                       System.err.println("file :"+e.getMessage());
-                   }
-
-                   //receiving files thread
-                   new Thread(()->{
-                       FileReceiver fileReceiver = new FileReceiver(chatApp.fileServer.getInputStream());
-                       fileReceiver.start();
-                       while(true){
-                           if(fileReceiver.receive())
-                               JOptionPane.showMessageDialog(chatApp,fileReceiver.getFilename()+"Received!");
-                           else break;
-                       }
-                   }).start();
-
-               }
-           }).start();
-
-       });
-   }
-    public static void main(String[] args) {
-        runApp();
-    }
 
 }

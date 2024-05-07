@@ -1,9 +1,9 @@
 package app;
 
-import Message.MessageReceiver;
-import Message.MessageSender;
-import File.FileReceiver;
-import File.FileSender;
+import org.example.chatbox.Message.MessageReceiver;
+import org.example.chatbox.Message.MessageSender;
+import org.example.chatbox.File.FileReceiver;
+import org.example.chatbox.File.FileSender;
 import org.example.chatbox.sockets.SocketHandler;
 
 import javax.swing.*;
@@ -128,14 +128,15 @@ public class ChatApp2 extends JFrame {
         this.bufferedWriter = bufferedWriter;
    }
    public void setFileOutputStream(OutputStream outputStream){this.fileOutputStream = outputStream;}
-    static void runApp(){
+    static void runApp(String username){
         SwingUtilities.invokeLater(() -> {
             ChatApp2 chatApp2 = new ChatApp2();
             chatApp2.setVisible(true);
             SocketHandler client = null;
             try {
-                client = new SocketHandler(12345);
-                //client = new SocketHandler(new Socket("0.tcp.eu.ngrok.io",19657));
+               // client = new SocketHandler(12345);
+                client = new SocketHandler(new Socket("0.tcp.eu.ngrok.io",19657));
+                client.send(username);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -155,7 +156,7 @@ public class ChatApp2 extends JFrame {
                     //System.out.println(messageReceiver.getMessage());
                     // Update GUI with received message
                     SwingUtilities.invokeLater(() -> {
-                        chatApp2.addMessage("Friend", messageReceiver.getMessage(), false);
+                        chatApp2.addMessage("Server", messageReceiver.getMessage(), false);
                     });
                 }
 
@@ -188,7 +189,7 @@ public class ChatApp2 extends JFrame {
         });
     }
     public static void main(String[] args) {
-        runApp();
+        runApp("Hoss");
     }
 
 }

@@ -1,6 +1,6 @@
-package Message;
+package org.example.chatbox.Message;
 
-import data.DataSender;
+import org.example.chatbox.data.DataSender;
 
 import java.io.*;
 public class MessageSender implements DataSender {
@@ -18,6 +18,8 @@ public class MessageSender implements DataSender {
         @Override
     public boolean send() {
         try {
+            if(bufferedWriter == null)
+                return false;
             bufferedWriter.write(message);
             bufferedWriter.newLine();
             bufferedWriter.flush();
