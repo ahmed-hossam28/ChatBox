@@ -45,7 +45,7 @@ public class RunServer {
                     String username = chatServer.messageServer.receive();
                     User user = new User(username, chatServer.messageServer.getClient());
                     chatServer.users.add(new Pair<>(user,true));
-                    receiveTestConnectionMessage(chatServer);
+
                     handelReceiveMessages(chatServer,username);
 
 

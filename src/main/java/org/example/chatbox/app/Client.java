@@ -13,8 +13,11 @@ import java.net.Socket;
 public class Client extends JFrame {
     private JPanel chatPanel;
     private JTextField messageField;
+    SocketHandler messageSocketHandler;
+    SocketHandler fileSocketHandler;
     BufferedWriter bufferedWriter;
     OutputStream fileOutputStream;
+
     public Client()  {
         setTitle("Chat App2");
         setSize(600, 400);
@@ -69,6 +72,39 @@ public class Client extends JFrame {
 
         add(inputPanel, BorderLayout.SOUTH);
     }
+    public void initDataCommunication(){
+        this.bufferedWriter = messageSocketHandler.getBufferedWriter();
+        this.fileOutputStream = fileSocketHandler.getOutputStream();
+    }
+    public void setSocketHandlers(Socket socket1,Socket socket2){
+        messageSocketHandler = new SocketHandler(socket1);
+        fileSocketHandler = new SocketHandler(socket2);
+        initDataCommunication();
+
+    }
+    public void setSocketHandlers(SocketHandler socketHandler1,SocketHandler socketHandler2){
+        messageSocketHandler = socketHandler1;
+        fileSocketHandler = socketHandler2;
+        initDataCommunication();
+
+    }
+    public void setMessageSocketHandler(Socket socket) {
+        this.messageSocketHandler = new SocketHandler(socket);
+        this.bufferedWriter = messageSocketHandler.getBufferedWriter();
+    }
+    public void setMessageSocketHandler(SocketHandler socketHandler) {
+        this.messageSocketHandler = socketHandler;
+        this.bufferedWriter = messageSocketHandler.getBufferedWriter();
+    }
+    public void setFileSocketHandler(Socket socket) {
+        this.fileSocketHandler = new SocketHandler(socket);
+        this.fileOutputStream = fileSocketHandler.getOutputStream();
+    }
+    public void setFileSocketHandler(SocketHandler socketHandler) {
+        this.fileSocketHandler = socketHandler;
+        this.fileOutputStream = fileSocketHandler.getOutputStream();
+    }
+
     public boolean sendMsg(){
         String message = messageField.getText();
         if (!message.isEmpty()) {
@@ -185,7 +221,7 @@ public class Client extends JFrame {
         if(flag)
             chatApp2.addSuccessMessage("Connection successful: Connected to server.");
     }
-    static void connect(SocketHandler client){
+    static void connect(){
 
     }
     static void runApp(String username){
@@ -196,16 +232,19 @@ public class Client extends JFrame {
             try {
                 client = new SocketHandler(12345);
                 //client = new SocketHandler(new Socket("0.tcp.eu.ngrok.io",19657));
+                chatApp2.setMessageSocketHandler(client);
                 client.send(username);
             } catch (IOException e) {
                 chatApp2.addErrorMessage("Connection failed: Unable to connect to server.");
             }
-            if(client!=null)
-              chatApp2.setBufferedWriter(client.getBufferedWriter());
+            if(client == null){
+                while (true){
 
-            testConnection(chatApp2);
+                }
+            }
 
-            final SocketHandler finalClient = client;
+
+            final SocketHandler finalClient = chatApp2.messageSocketHandler;
             // MessageThread
             new Thread(() -> {
                 BufferedReader bufferedReader = finalClient.getBufferedReader();
@@ -232,13 +271,12 @@ public class Client extends JFrame {
             try {
                 //fileSocket = new SocketHandler(12346);
                 fileSocket = new SocketHandler(new Socket("4.tcp.eu.ngrok.io",16732));
+                chatApp2.setFileSocketHandler(fileSocket);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
 
-
-            SocketHandler finalFileSocket = fileSocket;
-            chatApp2.setFileOutputStream(finalFileSocket.getOutputStream());
+            SocketHandler finalFileSocket = chatApp2.fileSocketHandler;
             //file receiver thread
             new Thread(()->{
                 FileReceiver fileReceiver = new FileReceiver(finalFileSocket.getInputStream());
