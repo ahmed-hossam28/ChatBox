@@ -7,16 +7,16 @@ import java.net.Socket;
 public class ServerSocketHandler {
     ServerSocket serverSocket;
      int port = 12345;
-    Socket client;
+     Socket socket;
     //input
     InputStream inputStream;
     InputStreamReader inputStreamReader;
     BufferedReader bufferedReader;
-
+    //output
     OutputStream outputStream;
     OutputStreamWriter outputStreamWriter;
     BufferedWriter bufferedWriter;
-  public ServerSocketHandler() throws IOException {
+    public ServerSocketHandler() throws IOException {
        //tcp connection
             serverSocket = new ServerSocket(port);
     }
@@ -25,15 +25,17 @@ public class ServerSocketHandler {
     }
     public void start() throws IOException {
         System.out.println("waiting....");
-          client =   serverSocket.accept();//return socket  waiting//block waiting for connection
-        System.out.println("[+] connection from "+client);
+          socket =   serverSocket.accept();//return socket  waiting//block waiting for connection
+        System.out.println("[+] connection from "+ socket);
           //input
 
-          inputStream = client.getInputStream();
+          inputStream = socket.getInputStream();
+
           inputStreamReader = new InputStreamReader(inputStream);
           bufferedReader = new BufferedReader(inputStreamReader);
 
-          outputStream = client.getOutputStream();
+
+          outputStream = socket.getOutputStream();
           outputStreamWriter = new OutputStreamWriter(outputStream);
           bufferedWriter = new BufferedWriter(outputStreamWriter);
 
@@ -48,8 +50,8 @@ public class ServerSocketHandler {
   }
   public void send(String msg)throws IOException{
       bufferedWriter.write(msg);
-      bufferedWriter.newLine();
-      bufferedWriter.flush();
+      bufferedWriter.newLine();//
+      bufferedWriter.flush();//send to outputstream
     }
 
     public ServerSocket getServerSocket() {
@@ -60,8 +62,8 @@ public class ServerSocketHandler {
         return port;
     }
 
-    public Socket getClient() {
-        return client;
+    public Socket getSocket() {
+        return socket;
     }
 
     public InputStream getInputStream() {

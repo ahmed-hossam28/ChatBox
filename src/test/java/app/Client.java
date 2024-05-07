@@ -1,9 +1,9 @@
-package org.example.chatbox.app;
-import org.example.chatbox.Message.MessageReceiver;
+package app;
 import org.example.chatbox.Message.MessageSender;
 import org.example.chatbox.sockets.SocketHandler;
 import org.example.chatbox.File.FileSender;
-import org.example.chatbox.File.FileReceiver;
+
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -13,17 +13,18 @@ import java.net.Socket;
 public class Client extends JFrame {
     private JPanel chatPanel;
     private JTextField messageField;
+    public String username;
     public SocketHandler messageSocketHandler;
     public SocketHandler fileSocketHandler;
     BufferedWriter bufferedWriter;
     OutputStream fileOutputStream;
 
-    public Client()  {
+    public Client(String username)  {
+        this.username = username;
         setTitle("Chat App2");
         setSize(600, 400);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
-
         // Create the chat panel
         chatPanel = new JPanel();
         chatPanel.setLayout(new GridBagLayout());
@@ -69,13 +70,21 @@ public class Client extends JFrame {
             }
         });
         inputPanel.add(fileButton, BorderLayout.WEST);
+        JButton reconnectButton = new JButton("Reconnect");
+
+        reconnectButton.addActionListener(e -> reconnect());
+
+        inputPanel.add(reconnectButton, BorderLayout.NORTH);
 
         add(inputPanel, BorderLayout.SOUTH);
     }
+
+
     public void initDataCommunication(){
         this.bufferedWriter = messageSocketHandler.getBufferedWriter();
         this.fileOutputStream = fileSocketHandler.getOutputStream();
     }
+
     public void setSocketHandlers(Socket socket1,Socket socket2) throws IOException {
         messageSocketHandler = new SocketHandler(socket1);
         fileSocketHandler = new SocketHandler(socket2);
@@ -105,7 +114,7 @@ public class Client extends JFrame {
         this.fileOutputStream = fileSocketHandler.getOutputStream();
     }
 
-    public boolean sendMsg(){
+    public void sendMsg(){
         String message = messageField.getText();
         if (!message.isEmpty()) {
             addMessage("You", message, true);
@@ -115,7 +124,6 @@ public class Client extends JFrame {
 
                 if(!messageSender.send()){
                     addErrorMessage("Connection failed: Unable to connect to server.");
-                    return false;
                 }
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
@@ -123,7 +131,6 @@ public class Client extends JFrame {
             messageField.setText("");
         }
 
-        return true ;
     }
     public void addMessage(String sender, String message, boolean isSender) {
         JPanel messagePanel = new JPanel();
@@ -155,6 +162,7 @@ public class Client extends JFrame {
         revalidate();
         repaint();
     }
+
     public void addSuccessMessage(String successMessage) {
         JPanel successPanel = new JPanel();
         successPanel.setLayout(new BorderLayout());
@@ -177,7 +185,6 @@ public class Client extends JFrame {
         revalidate();
         repaint();
     }
-
     public void addErrorMessage(String errorMessage) {
         JPanel errorPanel = new JPanel();
         errorPanel.setLayout(new BorderLayout());
@@ -206,13 +213,13 @@ public class Client extends JFrame {
         fileSender.send();
         System.out.println("Sending file: " + file.getName());
     }
+
     public void setBufferedWriter(BufferedWriter bufferedWriter){
         this.bufferedWriter = bufferedWriter;
     }
     public void setFileOutputStream(OutputStream outputStream){this.fileOutputStream = outputStream;}
 
-
-    public static void testConnection(Client chatApp2){
+    public static void testConnection(org.example.chatbox.app.Client chatApp2){
         boolean flag = true;
         for(int i = 0;i<4;++i)
             if(!chatApp2.sendMsg())
@@ -221,80 +228,68 @@ public class Client extends JFrame {
         if(flag)
             chatApp2.addSuccessMessage("Connection successful: Connected to server.");
     }
-    static void connect(){
 
+    public void reconnect() {
+        try {
+            messageSocketHandler = new SocketHandler(12345);
+            fileSocketHandler = new SocketHandler(12346);
+            messageSocketHandler.send(this.username);
+            bufferedWriter = messageSocketHandler.getBufferedWriter();
+            fileOutputStream = fileSocketHandler.getOutputStream();
+            addSuccessMessage("Reconnection successful: Connected to server.");
+            System.out.println("Reconnection successful: Connected to server.");
+        } catch (IOException e) {
+            addErrorMessage("Reconnection failed: Unable to connect to server.");
+        }
     }
-    static void runApp(String username){
-        SwingUtilities.invokeLater(() -> {
-            Client chatApp2 = new Client();
-            chatApp2.setVisible(true);
-            SocketHandler client = null;
-            try {
-                client = new SocketHandler(12345);
-                //client = new SocketHandler(new Socket("0.tcp.eu.ngrok.io",19657));
-                chatApp2.setMessageSocketHandler(client);
-                client.send(username);
-            } catch (IOException e) {
-                chatApp2.addErrorMessage("Connection failed: Unable to connect to server.");
-            }
-
-//            if(client == null){
-//                while (true){
-//
-//                }
-//            }else {
-//                chatApp2.addSuccessMessage("Connection successful: Connected to server.");
-//            }
-
-
-            final SocketHandler finalClient = chatApp2.messageSocketHandler;
-            // MessageThread
-            new Thread(() -> {
-                BufferedReader bufferedReader = finalClient.getBufferedReader();
-                MessageReceiver messageReceiver = new MessageReceiver(bufferedReader);
-                messageReceiver.start();
-                while (true) {
-                    // Receive message
-                    if(!messageReceiver.receive()) {
-                        break;
-
-                    }
-                    //System.out.println(messageReceiver.getMessage());
-                    // Update GUI with received message
-                    SwingUtilities.invokeLater(() -> {
-                        chatApp2.addMessage("Server", messageReceiver.getMessage(), false);
-                    });
-                }
-
-
-
-            }).start();
-
-            SocketHandler fileSocket = null;
-            try {
-                //fileSocket = new SocketHandler(12346);
-                fileSocket = new SocketHandler(new Socket("4.tcp.eu.ngrok.io",16732));
-                chatApp2.setFileSocketHandler(fileSocket);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
-            SocketHandler finalFileSocket = chatApp2.fileSocketHandler;
-            //file receiver thread
-            new Thread(()->{
-                FileReceiver fileReceiver = new FileReceiver(finalFileSocket.getInputStream());
-                fileReceiver.start();
-                while(true){
-                    if(fileReceiver.receive())
-                        JOptionPane.showMessageDialog(chatApp2,fileReceiver.getFilename()+"Received!");
-                    else break;
-                }
-            }).start();
-
-        });
+    public void reconnect(Socket socket1,Socket socket2) {
+        try {
+            messageSocketHandler = new SocketHandler(socket1);
+            fileSocketHandler = new SocketHandler(socket2);
+            messageSocketHandler.send(this.username);
+            bufferedWriter = messageSocketHandler.getBufferedWriter();
+            fileOutputStream = fileSocketHandler.getOutputStream();
+            addSuccessMessage("Reconnection successful: Connected to server.");
+        } catch (IOException e) {
+            addErrorMessage("Reconnection failed: Unable to connect to server.");
+        }
     }
-    public static void main(String[] args) {
-        runApp("AhmedHossam");
+
+    public void connect(){
+        try {
+            messageSocketHandler = new SocketHandler(12345);
+            fileSocketHandler = new SocketHandler(12346);
+            messageSocketHandler.send(this.username);
+            bufferedWriter = messageSocketHandler.getBufferedWriter();
+            fileOutputStream = fileSocketHandler.getOutputStream();
+            addSuccessMessage("Connection successful: Connected to server.");
+        } catch (IOException e) {
+            addErrorMessage("Connection failed: Unable to connect to server.");
+        }
+    }
+    public void connect(Socket socket1, Socket socket2){
+        try {
+            messageSocketHandler = new SocketHandler(socket1);
+            fileSocketHandler = new SocketHandler(socket2);
+            messageSocketHandler.send(this.username);
+            bufferedWriter = messageSocketHandler.getBufferedWriter();
+            fileOutputStream = fileSocketHandler.getOutputStream();
+            addSuccessMessage("Connection successful: Connected to server.");
+        } catch (IOException e) {
+            addErrorMessage("Connection failed: Unable to connect to server.");
+        }
+    }
+    public void connect(int port1, int port2){
+        try {
+            messageSocketHandler = new SocketHandler(port1);
+            fileSocketHandler = new SocketHandler(port2);
+            messageSocketHandler.send(this.username);
+            bufferedWriter = messageSocketHandler.getBufferedWriter();
+            fileOutputStream = fileSocketHandler.getOutputStream();
+            addSuccessMessage("Connection successful: Connected to server.");
+        } catch (IOException e) {
+            addErrorMessage("Connection failed: Unable to connect to server.");
+        }
     }
 
 }

@@ -58,19 +58,19 @@ public class ChatApp2 extends JFrame {
         });
         inputPanel.add(sendButton, BorderLayout.EAST);
 
-        JButton fileButton = new JButton("Send File");
-        fileButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JFileChooser fileChooser = new JFileChooser();
-                int returnValue = fileChooser.showOpenDialog(ChatApp2.this);
-                if (returnValue == JFileChooser.APPROVE_OPTION) {
-                    File selectedFile = fileChooser.getSelectedFile();
-                    sendFile(selectedFile);
-                }
-            }
-        });
-        inputPanel.add(fileButton, BorderLayout.WEST);
+//        JButton fileButton = new JButton("Send File");
+//        fileButton.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                JFileChooser fileChooser = new JFileChooser();
+//                int returnValue = fileChooser.showOpenDialog(ChatApp2.this);
+//                if (returnValue == JFileChooser.APPROVE_OPTION) {
+//                    File selectedFile = fileChooser.getSelectedFile();
+//                    sendFile(selectedFile);
+//                }
+//            }
+//        });
+//        inputPanel.add(fileButton, BorderLayout.WEST);
 
         add(inputPanel, BorderLayout.SOUTH);
     }

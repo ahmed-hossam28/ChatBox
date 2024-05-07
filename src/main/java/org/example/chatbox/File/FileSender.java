@@ -3,7 +3,7 @@ import org.example.chatbox.data.DataSender;
 
 import java.io.*;
 
-public class FileSender implements DataSender {
+public class FileSender{
 
      OutputStream outputStream;
      File file;
@@ -14,11 +14,11 @@ public class FileSender implements DataSender {
     }
 
 
-    @Override
+
     public boolean send() {
         try {
             String filename = file.getName();
-            long fileSize = file.length();
+            long fileSize = file.length();//mohema
             FileInputStream fileInputStream = new FileInputStream(file);
 
             DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
@@ -30,7 +30,7 @@ public class FileSender implements DataSender {
             //
 
             // Write file contents to the output stream
-            byte[] buffer = new byte[1024];
+            byte[] buffer = new byte[1024];//array
             int bytesRead;
             while ((bytesRead = fileInputStream.read(buffer)) != -1) {
                 outputStream.write(buffer, 0, bytesRead);

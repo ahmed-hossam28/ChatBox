@@ -4,8 +4,8 @@ import java.io.*;
 import java.net.Socket;
 
 public class SocketHandler {
-    String host = "ip address";
-    int port = 17413;
+    String host = "localhost";//ipaddress
+    int port = 12345;//request ray7 3ala fen
     Socket socket;
     InputStream inputStream;
     InputStreamReader inputStreamReader;
@@ -14,11 +14,14 @@ public class SocketHandler {
     OutputStream outputStream;
     OutputStreamWriter outputStreamWriter;
     BufferedWriter bufferedWriter;
-   public SocketHandler() {
+   public SocketHandler()  {
        try {
-           socket = new Socket("0.tcp.eu.ngrok.io",this.port);//
+           socket = new Socket(host,this.port);//
+           //request hasal already
+
        } catch (IOException e) {
            System.err.println(e.getMessage());
+
        }
        try {
            initDataCommunication();//
@@ -37,13 +40,10 @@ public class SocketHandler {
         bufferedWriter = new BufferedWriter(outputStreamWriter);
     }
 
-  public  SocketHandler(Socket socket){
+  public  SocketHandler(Socket socket) throws IOException {
        this.socket = socket;
-        try {
-            initDataCommunication();
-        } catch (IOException e) {
-            System.err.println(e.getMessage());
-        }
+       initDataCommunication();
+
     }
 
 

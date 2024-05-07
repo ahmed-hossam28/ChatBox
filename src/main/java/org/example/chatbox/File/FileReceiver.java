@@ -48,6 +48,7 @@ public class FileReceiver {
          savePath = saveDir+"/"+filename;
          try  {
              FileOutputStream fileOutputStream = new FileOutputStream(savePath);
+
              byte[] buffer = new byte[1024];
              int bytesRead;
              long bytesReceived = 0;
@@ -60,7 +61,6 @@ public class FileReceiver {
              }
              else {
                  System.out.println("File received and saved successfully");
-                 return true;
              }
             // file = new File(savePath);
          }

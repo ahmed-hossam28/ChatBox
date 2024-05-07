@@ -11,8 +11,6 @@ import java.io.IOException;
 
 public class RunServer {
 
-
-
     static void handelReceiveMessages(ChatServer chatServer,String username){
         //each thread for each client so connection remain
         new Thread(() -> {
@@ -30,12 +28,6 @@ public class RunServer {
             }
         }).start();
     }
-   static void receiveTestConnectionMessage(ChatServer chatServer){
-        BufferedReader bufferedReader = chatServer.messageServer.getBufferedReader();
-        MessageReceiver messageReceiver = new MessageReceiver(bufferedReader);
-        messageReceiver.receive();
-        messageReceiver.receive();
-    }
     static void handleMessagingRequests(ChatServer chatServer){
         //MessageThread
         new Thread(()-> {
@@ -43,7 +35,7 @@ public class RunServer {
                 while (true) {
                     chatServer.messageServer.start();
                     String username = chatServer.messageServer.receive();
-                    User user = new User(username, chatServer.messageServer.getClient());
+                    User user = new User(username, chatServer.messageServer.getSocket());
                     chatServer.users.add(new Pair<>(user,true));
 
                     handelReceiveMessages(chatServer,username);
