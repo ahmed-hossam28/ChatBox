@@ -7,23 +7,23 @@ import java.net.Socket;
 
 public class User {
     String name;
-    SocketHandler socketHandler;
+    SocketHandler messageSocketHandler;
   public  User(String name,Socket socket) throws IOException {
         this.name =name;
-        socketHandler = new SocketHandler(socket);
+        messageSocketHandler = new SocketHandler(socket);
     }
-  public void setSocketHandler(SocketHandler socketHandler) {
-        this.socketHandler = socketHandler;
+  public void setMessageSocketHandler(SocketHandler messageSocketHandler) {
+        this.messageSocketHandler = messageSocketHandler;
     }
     public void setSocketHandler(Socket socket) throws IOException {
-      this.socketHandler = new SocketHandler(socket);
+      this.messageSocketHandler = new SocketHandler(socket);
     }
 
     public String getName() {
         return name;
     }
 
-    public SocketHandler getSocketHandler() {
-        return socketHandler;
+    public SocketHandler getMessageSocketHandler() {
+        return messageSocketHandler;
     }
 }

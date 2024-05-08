@@ -4,6 +4,7 @@ import org.example.chatbox.Message.MessageSender;
 import org.example.chatbox.File.FileSender;
 import org.example.chatbox.pair.Pair;
 import org.example.chatbox.sockets.ServerSocketHandler;
+import org.example.chatbox.sockets.SocketHandler;
 import org.example.chatbox.user.User;
 
 import javax.swing.*;
@@ -14,12 +15,14 @@ import java.util.ArrayList;
 
 public class ChatServer extends JFrame {
     ArrayList<Pair<User,Boolean>>users;
+    ArrayList<Pair<SocketHandler,Boolean>>userFileConnections;
     private JPanel chatPanel;
     private JTextField messageField;
     ServerSocketHandler messageServer;
     ServerSocketHandler fileServer;
     public ChatServer() {
         users = new ArrayList<>();
+        userFileConnections = new ArrayList<>();
         try {
             messageServer = new ServerSocketHandler();
             fileServer = new ServerSocketHandler(12346);
@@ -80,7 +83,8 @@ public class ChatServer extends JFrame {
         if (!message.isEmpty()) {
             addMessage("You", message, true);
 
-           sendToMultipleUsers();
+            sendToMultipleUsers();
+            //sendToSingleUser();
 
             messageField.setText("");
         }
@@ -89,12 +93,12 @@ public class ChatServer extends JFrame {
     void sendToMultipleUsers(){
         try {
            for(var user:users) {
-               MessageSender messageSender = new MessageSender(user.first.getSocketHandler().getBufferedWriter());
+               MessageSender messageSender = new MessageSender(user.first.getMessageSocketHandler().getBufferedWriter());
                messageSender.setMessage(messageField.getText());
 
               if(user.second) {
                   if (!messageSender.send()) {
-                      System.out.println("[-] connection "+user.first.getName()+" at addr" +user.first.getSocketHandler().getSocket() + " has disconnected!");
+                      System.out.println("[-] connection "+user.first.getName()+" at addr" +user.first.getMessageSocketHandler().getSocket() + " has disconnected!");
                       user.second = false;
                   }
               }
@@ -149,10 +153,26 @@ public class ChatServer extends JFrame {
     }
 
     public void sendFile(File file) {
-
+        sendToMultipleUsers(file);
+    }
+    public void sendToSingleUser(File file){
         FileSender fileSender = new FileSender(file, fileServer.getOutputStream());
-        fileSender.send();
+        if(!fileSender.send())
+            System.err.println("err sending file");
         System.out.println("Sending file: " + file.getName());
+    }
+    public void sendToMultipleUsers(File file){
+        for(var usersFileHandler:userFileConnections){
+            FileSender fileSender = new FileSender(file, usersFileHandler.first.getOutputStream());
+            if(!fileSender.send()) {
+                System.err.println("err sending file");
+                System.out.println("[-]file server for "+usersFileHandler.first.getSocket());
+                usersFileHandler.second=false;
+            }
+            System.out.println("Sending file: " + file.getName());
+        }
+
+        userFileConnections.removeIf(user->!user.second);
     }
 
 

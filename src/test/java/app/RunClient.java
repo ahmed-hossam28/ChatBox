@@ -11,12 +11,16 @@ import java.util.concurrent.Executors;
 
 public class RunClient {
    static boolean proxy = false;
+   static String proxyHost1 = "0.tcp.eu.ngrok.io";
+   static String proxyHost2 = "4.tcp.eu.ngrok.io";
+   static int port1 = 19657;
+   static int port2 = 16732;
    static ExecutorService executorService = Executors.newFixedThreadPool(10);
    static void messageThread(Client chatApp2){
-        executorService.execute(() -> {
+        new Thread(() -> {
             while (true) {
                 if(!chatApp2.connectionStatus) {
-                    System.out.println("outer loop");
+                    chatApp2.reconnectInBackground(proxy);
                     continue;
                 }
                 MessageReceiver messageReceiver = null;
@@ -30,7 +34,7 @@ public class RunClient {
                 while(true) {
                    // System.out.println("working inner loop");
                     if(messageReceiver.getBufferedReader() == null) {
-                        System.out.println("problem is here");
+                        System.err.println("problem is here");
                         break;
                     }
                     if (!messageReceiver.receive()) {
@@ -49,25 +53,27 @@ public class RunClient {
 
 
 
-        });
+        }).start();
     }
    static void fileThread(Client chatApp2){
         new Thread(()->{
             FileReceiver fileReceiver = null;
             while(true){
                 if(!chatApp2.connectionStatus) {
-                    System.out.println(" ");
-                    continue;
-                }
-                //for reconnection
-                try {
-                    fileReceiver  = new FileReceiver(chatApp2.fileSocketHandler.getInputStream());
-                    fileReceiver.start();
-                }catch (NullPointerException ex){
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
                     continue;
                 }
                 while(true) {
-                    System.out.println("works inner loop");
+                    try {
+                        fileReceiver  = new FileReceiver(chatApp2.fileSocketHandler.getInputStream());
+                        fileReceiver.start();
+                    }catch (NullPointerException ex){
+                        continue;
+                    }
                     if (fileReceiver.receive())
                         JOptionPane.showMessageDialog(chatApp2, fileReceiver.getFilename() + " Received!");
                     else {
@@ -80,10 +86,50 @@ public class RunClient {
             }
         }).start();
     }
+   static void fileThreadTest(Client chatApp2){
+       new Thread(() -> {
+           while (true) {
+               if(!chatApp2.connectionStatus) {
+                   try {
+                       Thread.sleep(1000);
+                   } catch (InterruptedException e) {
+                       throw new RuntimeException(e);
+                   }
+                   continue;
+               }
+               FileReceiver fileReceiver = null;
+               try {
+                   fileReceiver = new FileReceiver(chatApp2.fileSocketHandler.getInputStream());
+               }catch (NullPointerException e){
+                   System.out.println("it is null ");
+                   continue;
+               }
+               // Receive message
+               while(true) {
+                   // System.out.println("working inner loop");
+                   if(fileReceiver.getInputStream() == null) {
+                       System.err.println("problem is here");
+                       break;
+                   }
+                   if (fileReceiver.receive())
+                       JOptionPane.showMessageDialog(chatApp2, fileReceiver.getFilename() + " Received!");
+                   else {
+                       System.out.println("Connection Broken!");
+                       chatApp2.connectionStatus = false;
+                       SwingUtilities.invokeLater(chatApp2::error);
+                       break;
+                   }
+               }
+           }
+
+
+
+       }).start();
+   }
    static void connectUsingProxy(Client chatApp2){
            try {
-               Socket proxy1 = new Socket("0.tcp.eu.ngrok.io", 19657);
-               Socket proxy2 = new Socket("4.tcp.eu.ngrok.io", 16732);
+               Socket proxy1 = new Socket(proxyHost1, port1);
+               Socket proxy2 = new Socket(proxyHost2, port2);
                chatApp2.connect(proxy1, proxy2);
            } catch (IOException ex) {
                chatApp2.error();
@@ -95,13 +141,18 @@ public class RunClient {
             Client chatApp2 = new Client(username);
             chatApp2.setVisible(true);
 
-            if(proxy)
+            if(proxy) {
                 connectUsingProxy(chatApp2);
+                chatApp2.setProxy(true);
+                chatApp2.setProxyConf(proxyHost1,port1,proxyHost2,port2);
+            }
             else
                 chatApp2.connect();
 
+
             messageThread(chatApp2);
-            fileThread(chatApp2);
+           // fileThread(chatApp2);
+            fileThreadTest(chatApp2);
 
         });
     }

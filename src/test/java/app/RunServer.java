@@ -3,6 +3,7 @@ package app;
 import org.example.chatbox.File.FileReceiver;
 import org.example.chatbox.Message.MessageReceiver;
 import org.example.chatbox.pair.Pair;
+import org.example.chatbox.sockets.SocketHandler;
 import org.example.chatbox.user.User;
 
 import javax.swing.*;
@@ -40,7 +41,6 @@ public class RunServer {
 
                     handelReceiveMessages(chatServer,username);
 
-
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -54,6 +54,7 @@ public class RunServer {
                 try {
                     System.out.print("FILE:");
                     chatServer.fileServer.start();
+                    chatServer.userFileConnections.add(new Pair<>(new SocketHandler(chatServer.fileServer.getSocket()),true));
 
                 } catch (IOException e) {
                     System.err.println("file :"+e.getMessage());

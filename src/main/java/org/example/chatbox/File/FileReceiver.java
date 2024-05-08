@@ -82,4 +82,7 @@ public class FileReceiver {
     public String getFilename() {
         return filename;
     }
+    public InputStream getInputStream(){
+       return inputStream;
+    }
 }

@@ -12,6 +12,7 @@ import java.net.Socket;
 
 public class Client extends JFrame {
     public  boolean connectionStatus = true;
+    public  boolean proxy  = false;
     private JPanel chatPanel;
     private JTextField messageField;
     public String username;
@@ -19,7 +20,10 @@ public class Client extends JFrame {
     public SocketHandler fileSocketHandler;
     BufferedWriter bufferedWriter;
     OutputStream fileOutputStream;
-
+    String proxyHost1;
+    int proxyPort1;
+    String proxyHost2;
+    int proxyPort2;
     public Client(String username)  {
         this.username = username;
         setTitle("ChatBox@"+username);
@@ -73,11 +77,21 @@ public class Client extends JFrame {
         inputPanel.add(fileButton, BorderLayout.WEST);
         JButton reconnectButton = new JButton("Reconnect");
 
-        reconnectButton.addActionListener(e -> reconnect());
+        if(!proxy)
+            reconnectButton.addActionListener(e -> reconnect());
+        else
+            reconnectButton.addActionListener(e -> reconnectUsingProxy());
 
         inputPanel.add(reconnectButton, BorderLayout.NORTH);
 
         add(inputPanel, BorderLayout.SOUTH);
+    }
+
+    public void setProxyConf(String proxyHost1,int proxyPort1,String proxyHost2,int proxyPort2){
+        this.proxyHost1 = proxyHost1;
+        this.proxyPort1 = proxyPort1;
+        this.proxyHost2 = proxyHost2;
+        this.proxyPort2 = proxyPort2;
     }
 
 
@@ -85,7 +99,6 @@ public class Client extends JFrame {
         this.bufferedWriter = messageSocketHandler.getBufferedWriter();
         this.fileOutputStream = fileSocketHandler.getOutputStream();
     }
-
     public void setSocketHandlers(Socket socket1,Socket socket2) throws IOException {
         messageSocketHandler = new SocketHandler(socket1);
         fileSocketHandler = new SocketHandler(socket2);
@@ -224,16 +237,6 @@ public class Client extends JFrame {
     }
     public void setFileOutputStream(OutputStream outputStream){this.fileOutputStream = outputStream;}
 
-    public static void testConnection(org.example.chatbox.app.Client chatApp2){
-        boolean flag = true;
-        for(int i = 0;i<4;++i)
-            if(!chatApp2.sendMsg())
-                flag = false;
-
-        if(flag)
-            chatApp2.addSuccessMessage("Connection successful: Connected to server.");
-    }
-
     public void reconnect() {
         try {
             messageSocketHandler = new SocketHandler(12345);
@@ -257,11 +260,45 @@ public class Client extends JFrame {
             bufferedWriter = messageSocketHandler.getBufferedWriter();
             fileOutputStream = fileSocketHandler.getOutputStream();
             addSuccessMessage("Reconnection successful: Connected to server.");
+            connectionStatus = true;
         } catch (IOException e) {
             addErrorMessage("Reconnection failed: Unable to connect to server.");
+            connectionStatus = false;
+        }
+    }
+    public void reconnectUsingProxy() {
+        try {
+            reconnect(new Socket(proxyHost1, proxyPort1), new Socket(proxyHost2, proxyPort2));
+        }catch (IOException ex){
+            addErrorMessage("Reconnection failed: Unable to connect to server.");
+            connectionStatus = false;
         }
     }
 
+    public void reconnectInBackground(boolean proxy){
+        //without error message to the user
+        if(proxy){
+            try {
+                reconnect(new Socket(proxyHost1, proxyPort1), new Socket(proxyHost2, proxyPort2));
+            }catch (IOException ex){
+                connectionStatus = false;
+            }
+        }
+        else {
+            try {
+                messageSocketHandler = new SocketHandler(12345);
+                fileSocketHandler = new SocketHandler(12346);
+                messageSocketHandler.send(this.username);
+                bufferedWriter = messageSocketHandler.getBufferedWriter();
+                fileOutputStream = fileSocketHandler.getOutputStream();
+                addSuccessMessage("Reconnection successful: Connected to server.");
+                System.out.println("Reconnection successful: Connected to server.");
+                connectionStatus = true;
+            } catch (IOException e) {
+                connectionStatus = false;
+            }
+        }
+    }
     public void connect(){
         try {
             messageSocketHandler = new SocketHandler(12345);
@@ -308,6 +345,9 @@ public class Client extends JFrame {
     public void error(){
         addErrorMessage("Connection failed: Unable to connect to server.");
         connectionStatus = false;
+    }
+    public void setProxy(boolean proxy){
+        this.proxy = proxy;
     }
 
 
