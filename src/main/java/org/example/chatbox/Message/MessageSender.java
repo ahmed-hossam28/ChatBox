@@ -23,12 +23,12 @@ public class MessageSender {
             bufferedWriter.write(message);
             bufferedWriter.newLine();//
             bufferedWriter.flush();// send to outputStream
-            return true;
         } catch (IOException e) {
             System.err.println("IO ERR " + e.getMessage());
             return false;
         }
 
+        return true;
     }
 
     public String getMessage() {

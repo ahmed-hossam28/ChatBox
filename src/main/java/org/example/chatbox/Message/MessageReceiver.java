@@ -26,6 +26,7 @@ public class MessageReceiver {
             }
         } catch (IOException e) {
             System.err.println("IO err "+e.getMessage());
+            return false;
         }
 
         return true;

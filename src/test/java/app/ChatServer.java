@@ -26,7 +26,7 @@ public class ChatServer extends JFrame {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        setTitle("Chat App1");
+        setTitle("Server");
         setSize(600, 400);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
@@ -49,12 +49,7 @@ public class ChatServer extends JFrame {
         inputPanel.add(messageField, BorderLayout.CENTER);
 
         JButton sendButton = new JButton("Send");
-        sendButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                  sendMsg();
-            }
-        });
+        sendButton.addActionListener(e -> sendMsg());
 
         messageField.addKeyListener(new KeyAdapter() {
             @Override
@@ -68,15 +63,12 @@ public class ChatServer extends JFrame {
         inputPanel.add(sendButton, BorderLayout.EAST);
 
         JButton fileButton = new JButton("Send File");
-        fileButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JFileChooser fileChooser = new JFileChooser();
-                int returnValue = fileChooser.showOpenDialog(ChatServer.this);
-                if (returnValue == JFileChooser.APPROVE_OPTION) {
-                    File selectedFile = fileChooser.getSelectedFile();
-                    sendFile(selectedFile);
-                }
+        fileButton.addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            int returnValue = fileChooser.showOpenDialog(ChatServer.this);
+            if (returnValue == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
+                sendFile(selectedFile);
             }
         });
         inputPanel.add(fileButton, BorderLayout.WEST);

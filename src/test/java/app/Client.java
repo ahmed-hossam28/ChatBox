@@ -11,6 +11,7 @@ import java.io.*;
 import java.net.Socket;
 
 public class Client extends JFrame {
+    public  boolean connectionStatus = true;
     private JPanel chatPanel;
     private JTextField messageField;
     public String username;
@@ -21,7 +22,7 @@ public class Client extends JFrame {
 
     public Client(String username)  {
         this.username = username;
-        setTitle("Chat App2");
+        setTitle("ChatBox@"+username);
         setSize(600, 400);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
@@ -124,6 +125,7 @@ public class Client extends JFrame {
 
                 if(!messageSender.send()){
                     addErrorMessage("Connection failed: Unable to connect to server.");
+                    connectionStatus = false;
                 }
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
@@ -210,8 +212,11 @@ public class Client extends JFrame {
 
     private void sendFile(File file) {
         FileSender fileSender = new FileSender(file,fileOutputStream);
-        fileSender.send();
-        System.out.println("Sending file: " + file.getName());
+        if(!fileSender.send()) {
+            addErrorMessage("Connection failed: Unable to connect to server.");
+            connectionStatus = false;
+        }
+        else System.out.println("Sending file: " + file.getName());
     }
 
     public void setBufferedWriter(BufferedWriter bufferedWriter){
@@ -238,8 +243,10 @@ public class Client extends JFrame {
             fileOutputStream = fileSocketHandler.getOutputStream();
             addSuccessMessage("Reconnection successful: Connected to server.");
             System.out.println("Reconnection successful: Connected to server.");
+            connectionStatus = true;
         } catch (IOException e) {
             addErrorMessage("Reconnection failed: Unable to connect to server.");
+            connectionStatus = false;
         }
     }
     public void reconnect(Socket socket1,Socket socket2) {
@@ -263,8 +270,10 @@ public class Client extends JFrame {
             bufferedWriter = messageSocketHandler.getBufferedWriter();
             fileOutputStream = fileSocketHandler.getOutputStream();
             addSuccessMessage("Connection successful: Connected to server.");
+            connectionStatus = true ;
         } catch (IOException e) {
             addErrorMessage("Connection failed: Unable to connect to server.");
+            connectionStatus = false;
         }
     }
     public void connect(Socket socket1, Socket socket2){
@@ -275,8 +284,10 @@ public class Client extends JFrame {
             bufferedWriter = messageSocketHandler.getBufferedWriter();
             fileOutputStream = fileSocketHandler.getOutputStream();
             addSuccessMessage("Connection successful: Connected to server.");
+            connectionStatus = true;
         } catch (IOException e) {
             addErrorMessage("Connection failed: Unable to connect to server.");
+            connectionStatus = false;
         }
     }
     public void connect(int port1, int port2){
@@ -287,9 +298,17 @@ public class Client extends JFrame {
             bufferedWriter = messageSocketHandler.getBufferedWriter();
             fileOutputStream = fileSocketHandler.getOutputStream();
             addSuccessMessage("Connection successful: Connected to server.");
+            connectionStatus = true;
         } catch (IOException e) {
             addErrorMessage("Connection failed: Unable to connect to server.");
+            connectionStatus = false;
         }
     }
+
+    public void error(){
+        addErrorMessage("Connection failed: Unable to connect to server.");
+        connectionStatus = false;
+    }
+
 
 }
