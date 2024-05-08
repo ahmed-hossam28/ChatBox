@@ -15,7 +15,6 @@ public class RunClient {
    static String proxyHost2 = "4.tcp.eu.ngrok.io";
    static int port1 = 19657;
    static int port2 = 16732;
-   static ExecutorService executorService = Executors.newFixedThreadPool(10);
    static void messageThread(Client chatApp2){
         new Thread(() -> {
             while (true) {
@@ -150,9 +149,9 @@ public class RunClient {
                 chatApp2.connect();
 
 
-            messageThread(chatApp2);
+            messageThread(chatApp2);//
            // fileThread(chatApp2);
-            fileThreadTest(chatApp2);
+            fileThreadTest(chatApp2);//
 
         });
     }
