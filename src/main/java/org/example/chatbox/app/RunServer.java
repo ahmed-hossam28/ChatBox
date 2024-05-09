@@ -1,4 +1,4 @@
-package app;
+package org.example.chatbox.app;
 
 import org.example.chatbox.File.FileReceiver;
 import org.example.chatbox.Message.MessageReceiver;
@@ -12,10 +12,10 @@ import java.io.IOException;
 
 public class RunServer {
 
-    static void handelReceiveMessages(ChatServer chatServer,String username){
+    static void handelReceiveMessages(Server server, String username){
         //each thread for each client so connection remain
         new Thread(() -> {
-            BufferedReader bufferedReader = chatServer.messageServer.getBufferedReader();
+            BufferedReader bufferedReader = server.messageServer.getBufferedReader();
             MessageReceiver messageReceiver = new MessageReceiver(bufferedReader);
             while (true) {
                 // Receive message
@@ -24,22 +24,22 @@ public class RunServer {
                 // System.out.println(messageReceiver.getMessage());
                 // Update GUI with received message
                 SwingUtilities.invokeLater(() -> {
-                    chatServer.addMessage(username, messageReceiver.getMessage(), false);
+                    server.addMessage(username, messageReceiver.getMessage(), false);
                 });
             }
         }).start();
     }
-    static void handleMessagingRequests(ChatServer chatServer){
+    static void handleMessagingRequests(Server server){
         //MessageThread
         new Thread(()-> {
             try {
                 while (true) {
-                    chatServer.messageServer.start();
-                    String username = chatServer.messageServer.receive();
-                    User user = new User(username, chatServer.messageServer.getSocket());
-                    chatServer.users.add(new Pair<>(user,true));
+                    server.messageServer.start();
+                    String username = server.messageServer.receive();
+                    User user = new User(username, server.messageServer.getSocket());
+                    server.users.add(new Pair<>(user,true));
 
-                    handelReceiveMessages(chatServer,username);
+                    handelReceiveMessages(server,username);
 
                 }
             } catch (IOException e) {
@@ -47,42 +47,42 @@ public class RunServer {
             }
         }).start();
     }
-    static void handleFileRequests(ChatServer chatServer){
+    static void handleFileRequests(Server server){
         //FileThread
         new Thread(()->{
             while(true){
                 try {
                     System.out.print("FILE:");
-                    chatServer.fileServer.start();
-                    chatServer.userFileConnections.add(new Pair<>(new SocketHandler(chatServer.fileServer.getSocket()),true));
+                    server.fileServer.start();
+                    server.userFileConnections.add(new Pair<>(new SocketHandler(server.fileServer.getSocket()),true));
 
                 } catch (IOException e) {
                     System.err.println("file :"+e.getMessage());
                 }
                 //receiving files thread
 
-                handleReceiveFiles(chatServer);
+                handleReceiveFiles(server);
             }
         }).start();
     }
-    static void handleReceiveFiles(ChatServer chatServer){
+    static void handleReceiveFiles(Server server){
         new Thread(()->{
-            FileReceiver fileReceiver = new FileReceiver(chatServer.fileServer.getInputStream());
+            FileReceiver fileReceiver = new FileReceiver(server.fileServer.getInputStream());
             fileReceiver.start();
             while(true){
                 if(fileReceiver.receive())
-                    JOptionPane.showMessageDialog(chatServer,fileReceiver.getFilename()+"Received!");
+                    JOptionPane.showMessageDialog(server,fileReceiver.getFilename()+"Received!");
                 else break;
             }
         }).start();
     }
     static void runApp(){
         SwingUtilities.invokeLater(() -> {
-            ChatServer chatServer = new ChatServer();
-            chatServer.setVisible(true);
+            Server server = new Server();
+            server.setVisible(true);
 
-           handleMessagingRequests(chatServer);
-           handleFileRequests(chatServer);
+           handleMessagingRequests(server);
+           handleFileRequests(server);
         });
     }
 

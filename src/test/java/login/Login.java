@@ -1,9 +1,9 @@
 package login;
 
-import app.RunClient;
+import org.example.chatbox.app.RunClient;
 import org.example.chatbox.database.DBConnection;
 import org.example.chatbox.database.MySQL;
-import registration.Registration;
+import org.example.chatbox.registration.Registration;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,6 +18,7 @@ public class Login extends JFrame {
     private Connection conn;
 
     public Login() {
+
         setTitle("Chat App - Login");
         setSize(400, 300);
         setDefaultCloseOperation(EXIT_ON_CLOSE);

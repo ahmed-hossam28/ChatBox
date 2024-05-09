@@ -1,4 +1,4 @@
-package app;
+package org.example.chatbox.app;
 
 import org.example.chatbox.File.FileReceiver;
 import org.example.chatbox.Message.MessageReceiver;
@@ -6,8 +6,6 @@ import org.example.chatbox.Message.MessageReceiver;
 import javax.swing.*;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class RunClient {
    static boolean proxy = false;

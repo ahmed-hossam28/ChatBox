@@ -1,10 +1,9 @@
 package org.example.chatbox.login;
 
-
-
-import org.example.chatbox.app.Server;
+import org.example.chatbox.app.RunClient;
 import org.example.chatbox.database.DBConnection;
 import org.example.chatbox.database.MySQL;
+import org.example.chatbox.registration.Registration;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,9 +14,15 @@ public class Login extends JFrame {
     private JTextField usernameField;
     private JPasswordField passwordField;
     private JButton loginButton;
+    private JButton registerButton; // Added registration button
     private Connection conn;
 
     public Login() {
+        try {
+            connectToDatabase();
+        }catch (SQLException e){
+            System.err.println("Failed  to connect to  database");
+        }
         setTitle("Chat App - Login");
         setSize(400, 300);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -91,6 +96,20 @@ public class Login extends JFrame {
             }
         });
 
+        // Add registration button
+        gbc.gridy++;
+        registerButton = new JButton("Register");
+        backgroundPanel.add(registerButton, gbc);
+
+        // Add action listener for registration button
+        registerButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                dispose(); // Close the login window
+                Registration registrationPage = new Registration();
+                registrationPage.setVisible(true); // Open the registration page
+            }
+        });
+
         // Add the background panel to the frame
         add(backgroundPanel, BorderLayout.CENTER);
 
@@ -102,12 +121,12 @@ public class Login extends JFrame {
 
     private boolean authenticateUser(String username, String password) throws SQLException {
         String query = "SELECT * FROM users WHERE name = ? AND pass = ?";
-        PreparedStatement statement = conn.prepareStatement(query);// for security
+        PreparedStatement statement = conn.prepareStatement(query); // for security
         statement.setString(1, username);
         statement.setString(2, password);
         ResultSet resultSet = statement.executeQuery();
 
-        return resultSet.next();//true of false //one record
+        return resultSet.next(); // true of false //one record
     }
 
     private void connectToDatabase() throws SQLException {
@@ -117,18 +136,14 @@ public class Login extends JFrame {
 
     private void openChatApp(String username) {
         dispose(); // Close the login window
-        Server chatApp = new Server(username);
-        chatApp.setVisible(true);
+        RunClient.runApp(username);
     }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            try {
                 Login loginApp = new Login();
-                loginApp.connectToDatabase();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
+                loginApp.setVisible(true);
+
         });
     }
 }
