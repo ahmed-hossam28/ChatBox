@@ -1,8 +1,13 @@
-package registration;
+package org.example.chatbox.registration;
+
+import org.example.chatbox.database.DBConnection;
+import org.example.chatbox.database.MySQL;
+import org.example.chatbox.login.Login;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 import java.sql.*;
 
 public class Registration extends JFrame {
@@ -13,6 +18,12 @@ public class Registration extends JFrame {
     private Connection conn;
 
     public Registration() {
+        try {
+            connectToDatabase();
+        }catch (SQLException e){
+            System.err.println("Failed  to connect to  database");
+        }
+
         setTitle("Chat App - Registration");
         setSize(400, 300);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -75,25 +86,25 @@ public class Registration extends JFrame {
                 String password = new String(passwordField.getPassword());
 
                 try {
-                    // Add registration logic here
-                    // Example: registerUser(username, password);
-                    // After successful registration, display a message or navigate to login page
+                    if (registerUser(username, password)) {
+                        JOptionPane.showMessageDialog(Registration.this, "Registration successful. You can now login.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(Registration.this, "Registration failed. Please try again.", "Registration Failed", JOptionPane.ERROR_MESSAGE);
+                    }
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(Registration.this, "Error: " + ex.getMessage(), "Registration Failed", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
 
-        // Add login button
         gbc.gridy++;
         loginButton = new JButton("Login");
         backgroundPanel.add(loginButton, gbc);
 
-        // Add action listener for login button
         loginButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                dispose(); // Close the registration window
-
+                dispose();
+                new Login().setVisible(true);
             }
         });
 
@@ -105,4 +116,19 @@ public class Registration extends JFrame {
         // Set the frame visible
         setVisible(true);
     }
+
+    private boolean registerUser(String username, String password) throws SQLException {
+        String query = "INSERT INTO users (name, pass) VALUES (?, ?)";
+        PreparedStatement statement = conn.prepareStatement(query);
+        statement.setString(1, username);
+        statement.setString(2, password);
+        int rowsInserted = statement.executeUpdate();
+        return rowsInserted > 0;
+    }
+
+    private void connectToDatabase() throws SQLException {
+        DBConnection mySQL = new MySQL("root", System.getenv("DB_PASSWORD"), "omda");
+        conn = mySQL.connect();
+    }
+
 }
