@@ -1,0 +1,40 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor User
+
+rectangle "Chat Application" {
+    usecase "Login" as UC1
+    usecase "Connect to Server" as UC2
+    usecase "Send Message" as UC3
+    usecase "Send File" as UC4
+    usecase "Receive Message" as UC5
+    usecase "Receive File" as UC6
+    usecase "Reconnect" as UC7
+    usecase "Authentication" as uc8
+    usecase "Register" as uc9
+    usecase "Notification" as uc10
+
+    usecase "Accept incomming Connections" as ac
+    usecase "Handle Received Messages" as hm
+    usecase "Handle Received Files" as hf
+}
+
+User --> UC1
+User --> UC2
+User --> UC3
+User --> UC4
+User --> UC5
+User --> UC6
+User --> UC7
+User --> uc9
+UC1 --> uc8 : <<include>>
+UC6 --> uc10 : <<include>>
+rectangle "Server" {
+    Server --> ac
+    Server --> hm
+    Server --> hf
+}
+
+@enduml

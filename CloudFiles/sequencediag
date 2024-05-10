@@ -1,0 +1,48 @@
+@startuml
+
+actor User
+participant "Client" as Client
+participant "Server" as Server
+participant "Database" as DB
+
+User -> Client: Opens Chat Application
+activate Client
+
+User -> Client: Enters Username and Password
+Client -> Server: Authenticate User
+activate Server
+Server -> DB: Query User Credentials
+activate DB
+DB --> Server: User Credentials
+deactivate DB
+Server --> Client: Authentication Result
+deactivate Server
+Client -> Server: Connect to Server
+activate Server
+Server --> Client: Connection Successful
+deactivate Server
+
+User -> Client: Sends Message
+Client -> Server: Send Message
+activate Server
+Server -> Server: Distribute Message to All Clients
+Server --> Client: Receive Message
+deactivate Server
+
+User -> Client: Sends File
+Client -> Server: Send File
+activate Server
+Server -> Server: Distribute File to All Clients
+Server --> Client: Receive File
+deactivate Server
+
+User -> Client: Logs Out
+Client -> Server: Disconnect
+activate Server
+Server --> Client: Connection Closed
+deactivate Server
+
+User -> Client: Closes Chat Application
+deactivate Client
+
+@enduml

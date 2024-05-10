@@ -14,15 +14,17 @@ import java.io.*;
 import java.util.ArrayList;
 
 public class ChatServer extends JFrame {
-    ArrayList<Pair<User,Boolean>>users;
-    ArrayList<Pair<SocketHandler,Boolean>>userFileConnections;
+    public ArrayList<Pair<User,Boolean>>users;
+    public ArrayList<Pair<SocketHandler,Boolean>>userFileConnections;
+    public ArrayList<Pair<User,Boolean>>userFileConnections1;
     private JPanel chatPanel;
     private JTextField messageField;
-    ServerSocketHandler messageServer;
-    ServerSocketHandler fileServer;
+    public ServerSocketHandler messageServer;
+    public ServerSocketHandler fileServer;
     public ChatServer() {
         users = new ArrayList<>();
         userFileConnections = new ArrayList<>();
+        userFileConnections1 = new ArrayList<>();
         try {
             messageServer = new ServerSocketHandler();
             fileServer = new ServerSocketHandler(12346);

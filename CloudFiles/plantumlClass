@@ -1,0 +1,196 @@
+@startuml
+
+@startuml
+
+class RunServer {
+
+    + messageThread(chatApp2: Client): void
+    + fileThread(chatApp2: Client): void
+    + fileThreadTest(chatApp2: Client): void
+    + connectUsingProxy(chatApp2: Client): void
+    + runApp(username: String): void
+}
+
+@enduml
+
+
+class Server {
+    - serverSocket: ServerSocket
+    - port: int
+    + Server()
+    + Server(int port)
+    + start(): void
+    + receive(): String
+    + send(msg: String): void
+}
+
+interface DBConnection {
+    + connect(): Connection
+}
+
+class MySQL {
+    - url: String
+    - username: String
+    - password: String
+    - dbname: String
+    + MySQL(username: String, password: String, dbname: String)
+    + connect(): Connection
+}
+
+class FileReceiver {
+    - saveDir: String
+    - inputStream: InputStream
+    - file: File
+    - filename: String
+    - savePath: String
+    - fileSize: long
+    + FileReceiver(inputStream: InputStream)
+    + start(): void
+    + receive(): boolean
+    + getFilename(): String
+    + getInputStream(): InputStream
+}
+
+class FileSender {
+    - outputStream: OutputStream
+    - file: File
+    + FileSender(file: File, outputStream: OutputStream)
+    + send(): boolean
+    + setFile(file: File): void
+}
+
+class MessageReceiver {
+    - message: String
+    - bufferedReader: BufferedReader
+    + MessageReceiver(bufferedReader: BufferedReader)
+    + start(): void
+    + receive(): boolean
+    + getMessage(): String
+    + getBufferedReader(): BufferedReader
+    + setBufferedReader(bufferedReader: BufferedReader): void
+}
+
+class MessageSender {
+    - bufferedWriter: BufferedWriter
+    - message: String
+    + MessageSender(bufferedWriter: BufferedWriter)
+    + MessageSender(bufferedWriter: BufferedWriter, message: String)
+    + send(): boolean
+    + getMessage(): String
+    + setMessage(message: String): void
+}
+
+class Pair<T, U> {
+    + first: T
+    + second: U
+    + Pair(first: T, second: U)
+}
+
+class ServerSocketHandler {
+    - serverSocket: ServerSocket
+    - port: int
+    - socket: Socket
+    - inputStream: InputStream
+    - inputStreamReader: InputStreamReader
+    - bufferedReader: BufferedReader
+    - outputStream: OutputStream
+    - outputStreamWriter: OutputStreamWriter
+    - bufferedWriter: BufferedWriter
+    + ServerSocketHandler()
+    + ServerSocketHandler(port: int)
+    + start(): void
+    + receive(): String
+    + send(msg: String): void
+    + getServerSocket(): ServerSocket
+    + getPort(): int
+    + getSocket(): Socket
+    + getInputStream(): InputStream
+    + getInputStreamReader(): InputStreamReader
+    + getBufferedReader(): BufferedReader
+    + getOutputStream(): OutputStream
+    + getOutputStreamWriter(): OutputStreamWriter
+    + getBufferedWriter(): BufferedWriter
+}
+
+class SocketHandler {
+    - host: String
+    - port: int
+    - socket: Socket
+    - inputStream: InputStream
+    - inputStreamReader: InputStreamReader
+    - bufferedReader: BufferedReader
+    - outputStream: OutputStream
+    - outputStreamWriter: OutputStreamWriter
+    - bufferedWriter: BufferedWriter
+    + SocketHandler()
+    + SocketHandler(socket: Socket)
+    + SocketHandler(port: int)
+    + setSocket(socket: Socket): void
+    + getPort(): int
+    + send(msg: String): void
+    + receive(): String
+    + getSocket(): Socket
+    + getInputStream(): InputStream
+    + getInputStreamReader(): InputStreamReader
+    + getBufferedReader(): BufferedReader
+    + getOutputStream(): OutputStream
+    + getOutputStreamWriter(): OutputStreamWriter
+    + getBufferedWriter(): BufferedWriter
+}
+
+class User {
+    - name: String
+    - messageSocketHandler: SocketHandler
+    + User(name: String, socket: Socket)
+    + setMessageSocketHandler(messageSocketHandler: SocketHandler): void
+    + setSocketHandler(socket: Socket): void
+    + getName(): String
+    + getMessageSocketHandler(): SocketHandler
+}
+
+class RunClient {
+    + proxy: boolean
+    + proxyHost1: String
+    + proxyHost2: String
+    + port1: int
+    + port2: int
+    + messageThread(chatApp2: Client): void
+    + fileThread(chatApp2: Client): void
+    + fileThreadTest(chatApp2: Client): void
+    + connectUsingProxy(chatApp2: Client): void
+    + runApp(username: String): void
+}
+class Client {
+    - name: String
+    - messageSocketHandler: SocketHandler
+    + Client(name: String)
+    + connectToServer(host: String, port: int): void
+    + startMessaging(): void
+    + sendMessage(message: String): void
+    + receiveMessage(): String
+}
+
+RunServer --> Server
+RunClient --> Client
+Server --> MessageReceiver
+Server --> MessageSender
+Server --> FileReceiver
+Server --> FileSender
+Server --> Pair
+Server --> ServerSocketHandler
+Server --> SocketHandler
+Server --> User
+Client --> MessageSender
+Client --> MessageReceiver
+Client --> FileSender
+Client --> FileReceiver
+Client --> Pair
+Client --> SocketHandler
+Client --> ServerSocketHandler
+Client --> User
+
+DBConnection <|.. MySQL
+Registration --> MySQL
+Login --> MySQL
+
+@enduml

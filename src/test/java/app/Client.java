@@ -242,6 +242,7 @@ public class Client extends JFrame {
             messageSocketHandler = new SocketHandler(12345);
             fileSocketHandler = new SocketHandler(12346);
             messageSocketHandler.send(this.username);
+            fileSocketHandler.send(this.username);
             bufferedWriter = messageSocketHandler.getBufferedWriter();
             fileOutputStream = fileSocketHandler.getOutputStream();
             addSuccessMessage("Reconnection successful: Connected to server.");
@@ -257,6 +258,7 @@ public class Client extends JFrame {
             messageSocketHandler = new SocketHandler(socket1);
             fileSocketHandler = new SocketHandler(socket2);
             messageSocketHandler.send(this.username);
+            fileSocketHandler.send(this.username);
             bufferedWriter = messageSocketHandler.getBufferedWriter();
             fileOutputStream = fileSocketHandler.getOutputStream();
             addSuccessMessage("Reconnection successful: Connected to server.");
@@ -289,6 +291,7 @@ public class Client extends JFrame {
                 messageSocketHandler = new SocketHandler(12345);
                 fileSocketHandler = new SocketHandler(12346);
                 messageSocketHandler.send(this.username);
+                fileSocketHandler.send(this.username);
                 bufferedWriter = messageSocketHandler.getBufferedWriter();
                 fileOutputStream = fileSocketHandler.getOutputStream();
                 addSuccessMessage("Reconnection successful: Connected to server.");
@@ -304,6 +307,7 @@ public class Client extends JFrame {
             messageSocketHandler = new SocketHandler(12345);
             fileSocketHandler = new SocketHandler(12346);
             messageSocketHandler.send(this.username);
+            fileSocketHandler.send(this.username);
             bufferedWriter = messageSocketHandler.getBufferedWriter();
             fileOutputStream = fileSocketHandler.getOutputStream();
             addSuccessMessage("Connection successful: Connected to server.");
@@ -318,6 +322,7 @@ public class Client extends JFrame {
             messageSocketHandler = new SocketHandler(socket1);
             fileSocketHandler = new SocketHandler(socket2);
             messageSocketHandler.send(this.username);
+            fileSocketHandler.send(this.username);
             bufferedWriter = messageSocketHandler.getBufferedWriter();
             fileOutputStream = fileSocketHandler.getOutputStream();
             addSuccessMessage("Connection successful: Connected to server.");
@@ -332,6 +337,7 @@ public class Client extends JFrame {
             messageSocketHandler = new SocketHandler(port1);
             fileSocketHandler = new SocketHandler(port2);
             messageSocketHandler.send(this.username);
+            fileSocketHandler.send(this.username);
             bufferedWriter = messageSocketHandler.getBufferedWriter();
             fileOutputStream = fileSocketHandler.getOutputStream();
             addSuccessMessage("Connection successful: Connected to server.");

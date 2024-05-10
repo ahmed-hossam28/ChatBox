@@ -2,7 +2,9 @@ package org.example.chatbox.user;
 
 import org.example.chatbox.sockets.SocketHandler;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.Socket;
 
 public class User {
@@ -25,5 +27,12 @@ public class User {
 
     public SocketHandler getMessageSocketHandler() {
         return messageSocketHandler;
+    }
+
+    public BufferedReader getBufferedReader() {
+    return   messageSocketHandler.getBufferedReader();
+    }
+    public InputStream getInputStream(){
+      return messageSocketHandler.getInputStream();
     }
 }
