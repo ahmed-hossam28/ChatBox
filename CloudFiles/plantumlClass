@@ -4,24 +4,29 @@
 
 class RunServer {
 
-    + messageThread(chatApp2: Client): void
-    + fileThread(chatApp2: Client): void
-    + fileThreadTest(chatApp2: Client): void
-    + connectUsingProxy(chatApp2: Client): void
-    + runApp(username: String): void
+    + handelReceiveMessages(server: Server): void
+    + handleMessagingConnectionRequests(server: Server): void
+    + handleFileConnectionRequests(server: Server): void
+    + handleReceiveFiles(server: Server): void
+    + runApp(): void
 }
 
 @enduml
 
 
 class Server {
-    - serverSocket: ServerSocket
-    - port: int
+    + users: ArrayList<Pair<User, Boolean>>
+    +userFileConnections: ArrayList<Pair<SocketHandler, Boolean>>
+    + messageServer: ServerSocketHandler
+    + fileServer: ServerSocketHandler
     + Server()
-    + Server(int port)
-    + start(): void
-    + receive(): String
-    + send(msg: String): void
+    + sendMsg(): void
+    + sendToMultipleUsers(): void
+    + sendToSingleUser(): void
+    + addMessage(String, String, boolean): void
+    + sendFile(File): void
+    + sendToSingleUser(File): void
+    + sendToMultipleUsers(File): void
 }
 
 interface DBConnection {
@@ -156,34 +161,62 @@ class RunClient {
     + port2: int
     + messageThread(chatApp2: Client): void
     + fileThread(chatApp2: Client): void
-    + fileThreadTest(chatApp2: Client): void
-    + connectUsingProxy(chatApp2: Client): void
+    + connect(chatApp2: Client): void
     + runApp(username: String): void
 }
 class Client {
-    - name: String
+     - connectionStatus: boolean
+    - proxy: boolean
+    - username: String
     - messageSocketHandler: SocketHandler
-    + Client(name: String)
-    + connectToServer(host: String, port: int): void
-    + startMessaging(): void
-    + sendMessage(message: String): void
-    + receiveMessage(): String
+    - fileSocketHandler: SocketHandler
+    - bufferedWriter: BufferedWriter
+    - fileOutputStream: OutputStream
+    - proxyHost1: String
+    - proxyPort1: int
+    - proxyHost2: String
+    - proxyPort2: int
+    + Client(String)
+    + setProxyConf(String, int, String, int): void
+    + initDataCommunication(): void
+    + setSocketHandlers(Socket, Socket): void
+    + setSocketHandlers(SocketHandler, SocketHandler): void
+    + setMessageSocketHandler(Socket): void
+    + setMessageSocketHandler(SocketHandler): void
+    + setFileSocketHandler(Socket): void
+    + setFileSocketHandler(SocketHandler): void
+    + sendMsg(): void
+    + addMessage(String, String, boolean): void
+    + addSuccessMessage(String): void
+    + addErrorMessage(String): void
+    + sendFile(File): void
+    + setBufferedWriter(BufferedWriter): void
+    + setFileOutputStream(OutputStream): void
+    + reconnect(): void
+    + reconnect(Socket, Socket): void
+    + reconnectUsingProxy(): void
+    + reconnectInBackground(boolean): void
+    + connect(): void
+    + connect(Socket, Socket): void
+    + connect(int, int): void
+    + error(): void
+    + setProxy(boolean): void
 }
 
 RunServer --> Server
 RunClient --> Client
-Server --> MessageReceiver
+RunServer --> MessageReceiver
 Server --> MessageSender
-Server --> FileReceiver
+RunServer --> FileReceiver
 Server --> FileSender
 Server --> Pair
 Server --> ServerSocketHandler
 Server --> SocketHandler
 Server --> User
 Client --> MessageSender
-Client --> MessageReceiver
+RunClient --> MessageReceiver
 Client --> FileSender
-Client --> FileReceiver
+RunClient --> FileReceiver
 Client --> Pair
 Client --> SocketHandler
 Client --> ServerSocketHandler

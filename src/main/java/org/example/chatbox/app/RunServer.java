@@ -12,24 +12,37 @@ import java.io.IOException;
 
 public class RunServer {
 
-    static void handelReceiveMessages(Server server, String username){
-        //each thread for each client so connection remain
+    static void handelReceiveMessages(Server server, String sender) {
         new Thread(() -> {
             BufferedReader bufferedReader = server.messageServer.getBufferedReader();
             MessageReceiver messageReceiver = new MessageReceiver(bufferedReader);
             while (true) {
-                // Receive message
-                if(!messageReceiver.receive())
+                if (!messageReceiver.receive())
                     break;
-                // System.out.println(messageReceiver.getMessage());
+
+                 String message = messageReceiver.getMessage();
+
+                // Send to all users except the one who sent it
+                for (var user : server.users) {
+                    if (!user.first.getName().equals(sender)) {
+                        try {
+                            // Send the message along with the sender's username
+                            user.first.getMessageSocketHandler().send(sender + ": " + message);
+                        } catch (Exception ex) {
+                            System.err.println("Connection broken for user: " + user.first.getName());
+                        }
+                    }
+                }
+
                 // Update GUI with received message
                 SwingUtilities.invokeLater(() -> {
-                    server.addMessage(username, messageReceiver.getMessage(), false);
+                    server.addMessage(sender, message, false); // Display sender's username along with the message
                 });
             }
         }).start();
     }
-    static void handleMessagingRequests(Server server){
+
+    static void handleMessagingConnectionRequests(Server server){
         //MessageThread
         new Thread(()-> {
             try {
@@ -38,16 +51,14 @@ public class RunServer {
                     String username = server.messageServer.receive();
                     User user = new User(username, server.messageServer.getSocket());
                     server.users.add(new Pair<>(user,true));
-
                     handelReceiveMessages(server,username);
-
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }).start();
     }
-    static void handleFileRequests(Server server){
+    static void handleFileConnectionRequests(Server server){
         //FileThread
         new Thread(()->{
             while(true){
@@ -68,10 +79,15 @@ public class RunServer {
     static void handleReceiveFiles(Server server){
         new Thread(()->{
             FileReceiver fileReceiver = new FileReceiver(server.fileServer.getInputStream());
-            fileReceiver.start();
+            fileReceiver.start();//for console to know that server is receiving files
+
+
             while(true){
-                if(fileReceiver.receive())
-                    JOptionPane.showMessageDialog(server,fileReceiver.getFilename()+"Received!");
+                if(fileReceiver.receive()) {
+                    server.sendToMultipleUsers(fileReceiver.getFile());
+                    JOptionPane.showMessageDialog(server, fileReceiver.getFilename() + "Received!");
+
+                }
                 else break;
             }
         }).start();
@@ -81,8 +97,8 @@ public class RunServer {
             Server server = new Server();
             server.setVisible(true);
 
-           handleMessagingRequests(server);
-           handleFileRequests(server);
+           handleMessagingConnectionRequests(server);
+           handleFileConnectionRequests(server);
         });
     }
 

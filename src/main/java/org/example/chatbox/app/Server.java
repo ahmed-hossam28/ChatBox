@@ -89,18 +89,19 @@ public class Server extends JFrame {
             messageField.setText("");
         }
     }
-
     void sendToMultipleUsers(){
         try {
             for(var user:users) {
                 MessageSender messageSender = new MessageSender(user.first.getMessageSocketHandler().getBufferedWriter());
                 messageSender.setMessage(messageField.getText());
-
                 if(user.second) {
                     if (!messageSender.send()) {
                         System.out.println("[-] connection "+user.first.getName()+" at addr" +user.first.getMessageSocketHandler().getSocket() + " has disconnected!");
                         user.second = false;
                     }
+                    messageSender.setMessage(user.first.getName());
+
+                    messageSender.send();
                 }
             }
 
@@ -110,7 +111,6 @@ public class Server extends JFrame {
             throw new RuntimeException(ex);
         }
     }
-
     void sendToSingleUser(){
         MessageSender messageSender = null;
         try {

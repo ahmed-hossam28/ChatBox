@@ -14,6 +14,7 @@ import java.io.*;
 import java.util.ArrayList;
 
 public class ChatServer extends JFrame {
+    public boolean isRunning = true;
     public ArrayList<Pair<User,Boolean>>users;
     public ArrayList<Pair<SocketHandler,Boolean>>userFileConnections;
     public ArrayList<Pair<User,Boolean>>userFileConnections1;
@@ -21,6 +22,8 @@ public class ChatServer extends JFrame {
     private JTextField messageField;
     public ServerSocketHandler messageServer;
     public ServerSocketHandler fileServer;
+    JButton startButton;
+    JButton stopButton;
     public ChatServer() {
         users = new ArrayList<>();
         userFileConnections = new ArrayList<>();
@@ -77,6 +80,22 @@ public class ChatServer extends JFrame {
             }
         });
         inputPanel.add(fileButton, BorderLayout.WEST);
+
+
+        startButton = new JButton("Start");
+        startButton.addActionListener(e -> startServer());
+
+        // Create stop button
+        stopButton = new JButton("Stop");
+        stopButton.addActionListener(e -> stopServer());
+        stopButton.setEnabled(false);
+
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.add(startButton);
+        buttonPanel.add(stopButton);
+
+        // Add buttons to the frame
+        add(buttonPanel, BorderLayout.NORTH);
 
         add(inputPanel, BorderLayout.SOUTH);
     }
@@ -176,6 +195,36 @@ public class ChatServer extends JFrame {
 
         userFileConnections.removeIf(user->!user.second);
     }
+
+    private void stopServer() {
+        // Stop the server
+        try {
+            messageServer.close();
+            fileServer.close();
+            startButton.setEnabled(true);
+            stopButton.setEnabled(false);
+            System.out.println("Server Stopped!");
+            isRunning = false;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    private void startServer() {
+        // Start the server
+        try {
+            messageServer = new ServerSocketHandler();
+            fileServer = new ServerSocketHandler(12346);
+            startButton.setEnabled(false);
+            stopButton.setEnabled(true);
+            System.out.println("Server Started!");
+            isRunning = true;
+        } catch (IOException e) {
+            System.out.println("Server is Already Started");
+            startButton.setEnabled(false);
+            stopButton.setEnabled(true);
+        }
+    }
+
 
 
 }

@@ -62,7 +62,7 @@ public class FileReceiver {
              else {
                  System.out.println("File received and saved successfully");
              }
-            // file = new File(savePath);
+             file = new File(savePath);
          }
          catch (IOException e) {
              System.err.println(e.getMessage());

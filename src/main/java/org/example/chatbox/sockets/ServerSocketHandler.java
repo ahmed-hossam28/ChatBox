@@ -7,7 +7,7 @@ import java.net.Socket;
 public class ServerSocketHandler {
     ServerSocket serverSocket;
      int port = 12345;
-     Socket socket;
+     Socket socket;//connection of client
     //input
     InputStream inputStream;
     InputStreamReader inputStreamReader;
@@ -88,5 +88,13 @@ public class ServerSocketHandler {
 
     public BufferedWriter getBufferedWriter() {
         return bufferedWriter;
+    }
+
+    public void close() throws IOException {
+        serverSocket.close();
+        bufferedReader.close();
+        inputStream.close();
+        outputStream.close();
+        bufferedWriter.close();
     }
 }

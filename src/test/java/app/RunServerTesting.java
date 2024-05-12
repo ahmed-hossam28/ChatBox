@@ -1,6 +1,6 @@
 package app;
 
-import app.ChatServer;
+
 import org.example.chatbox.File.FileReceiver;
 import org.example.chatbox.Message.MessageReceiver;
 import org.example.chatbox.Message.MessageSender;
@@ -72,6 +72,10 @@ public class RunServerTesting {
         new Thread(()-> {
             try {
                 while (true) {
+                    if(!server.isRunning) {
+                        Thread.sleep(1000);
+                        continue;
+                    }
                     server.messageServer.start();
                     String username = server.messageServer.receive();
                     User user = new User(username, server.messageServer.getSocket());
@@ -81,6 +85,8 @@ public class RunServerTesting {
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
         }).start();
     }
@@ -88,6 +94,14 @@ public class RunServerTesting {
         //FileThread
         new Thread(()->{
             while(true){
+                if(!server.isRunning) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    continue;
+                }
                 try {
                     System.out.print("FILE:");
                     server.fileServer.start();

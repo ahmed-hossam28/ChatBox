@@ -13,77 +13,55 @@ public class RunClient {
    static String proxyHost2 = "4.tcp.eu.ngrok.io";
    static int port1 = 19657;
    static int port2 = 16732;
-   static void messageThread(Client chatApp2){
+    static void connectToServer(Client chatApp2){
+        try {
+            Socket proxy1 = new Socket(proxyHost1, port1);
+            Socket proxy2 = new Socket(proxyHost2, port2);
+            chatApp2.connect(proxy1, proxy2);
+        } catch (IOException ex) {
+            chatApp2.error();
+        }
+    }
+    static void handelReceivedMessagesThread(Client chatApp2) {
         new Thread(() -> {
             while (true) {
-                if(!chatApp2.connectionStatus) {
+                if (!chatApp2.connectionStatus) {
                     chatApp2.reconnectInBackground(proxy);
                     continue;
                 }
                 MessageReceiver messageReceiver = null;
                 try {
                     messageReceiver = new MessageReceiver(chatApp2.messageSocketHandler.getBufferedReader());
-                }catch (NullPointerException e){
-                    System.out.println("it is null ");
+                } catch (NullPointerException e) {
+                    System.out.println("It is null");
                     continue;
                 }
+
                 // Receive message
-                while(true) {
-                   // System.out.println("working inner loop");
-                    if(messageReceiver.getBufferedReader() == null) {
-                        System.err.println("problem is here");
+                while (true) {
+                    if (messageReceiver.getBufferedReader() == null) {
+                        System.err.println("Problem is here");
                         break;
                     }
                     if (!messageReceiver.receive()) {
                         SwingUtilities.invokeLater(chatApp2::error);
                         break;
                     }
-                    //System.out.println(messageReceiver.getMessage());
-                    // Update GUI with received message
-                    MessageReceiver finalMessageReceiver = messageReceiver;
+                    String senderAndMessage = messageReceiver.getMessage(); // Assuming sender's username is sent along with the message
+                    int separatorIndex = senderAndMessage.indexOf(":");
+                    String sender = senderAndMessage.substring(0, separatorIndex).trim();
+                    String message = senderAndMessage.substring(separatorIndex + 1).trim();
 
+                    // Update GUI with received message including sender's username
                     SwingUtilities.invokeLater(() -> {
-                        chatApp2.addMessage("Server", finalMessageReceiver.getMessage(), false);
+                        chatApp2.addMessage(sender, message, false);
                     });
                 }
             }
-
-
-
         }).start();
     }
-   static void fileThread(Client chatApp2){
-        new Thread(()->{
-            FileReceiver fileReceiver = null;
-            while(true){
-                if(!chatApp2.connectionStatus) {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                    continue;
-                }
-                while(true) {
-                    try {
-                        fileReceiver  = new FileReceiver(chatApp2.fileSocketHandler.getInputStream());
-                        fileReceiver.start();
-                    }catch (NullPointerException ex){
-                        continue;
-                    }
-                    if (fileReceiver.receive())
-                        JOptionPane.showMessageDialog(chatApp2, fileReceiver.getFilename() + " Received!");
-                    else {
-                        System.out.println("Connection Broken!");
-                        chatApp2.connectionStatus = false;
-                        SwingUtilities.invokeLater(chatApp2::error);
-                        break;
-                    }
-                }
-            }
-        }).start();
-    }
-   static void fileThreadTest(Client chatApp2){
+
+    static void handelReceivedFilesThread(Client chatApp2){
        new Thread(() -> {
            while (true) {
                if(!chatApp2.connectionStatus) {
@@ -123,22 +101,13 @@ public class RunClient {
 
        }).start();
    }
-   static void connectUsingProxy(Client chatApp2){
-           try {
-               Socket proxy1 = new Socket(proxyHost1, port1);
-               Socket proxy2 = new Socket(proxyHost2, port2);
-               chatApp2.connect(proxy1, proxy2);
-           } catch (IOException ex) {
-               chatApp2.error();
-           }
-    }
     public  static void runApp(String username){
         SwingUtilities.invokeLater(() -> {
             Client chatApp2 = new Client(username);
             chatApp2.setVisible(true);
 
             if(proxy) {
-                connectUsingProxy(chatApp2);
+                connectToServer(chatApp2);
                 chatApp2.setProxy(true);
                 chatApp2.setProxyConf(proxyHost1,port1,proxyHost2,port2);
             }
@@ -146,9 +115,9 @@ public class RunClient {
                 chatApp2.connect();
 
 
-            messageThread(chatApp2);//
+            handelReceivedMessagesThread(chatApp2);//
            // fileThread(chatApp2);
-            fileThreadTest(chatApp2);//
+            handelReceivedFilesThread(chatApp2);//
 
         });
     }

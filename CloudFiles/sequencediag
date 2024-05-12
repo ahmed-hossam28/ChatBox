@@ -1,46 +1,107 @@
 @startuml
 
 actor User
-participant "Client" as Client
+participant "Login" as login
+participant "Register" as reg
+participant "ChatBox" as Client
 participant "Server" as Server
 participant "Database" as DB
 
-User -> Client: Opens Chat Application
-activate Client
-
-User -> Client: Enters Username and Password
-Client -> Server: Authenticate User
-activate Server
-Server -> DB: Query User Credentials
+User -> login: Opens Login page
+activate User
+activate login
+login->DB:connectToDatabase()
 activate DB
-DB --> Server: User Credentials
+DB-->login
+
 deactivate DB
-Server --> Client: Authentication Result
-deactivate Server
-Client -> Server: Connect to Server
-activate Server
-Server --> Client: Connection Successful
-deactivate Server
+User -> login: Enters Username and Password
+login -> DB: authenticateUser(username,password)
+activate DB
+DB --> login: User Credentials
+login-->User
+deactivate DB
+alt User not registered
+    login --> User: Registration Required
+    User->reg:open Registration page
+    activate reg
+    User->reg:Enters Username and Password
+    activate DB
+    reg->DB:registerUser(username, password)
+    DB-->reg
+    reg-->User:Regestered Successfully
+    reg-->login
+    deactivate DB
+    deactivate reg
+
+else User registered
+    login -> Client: open chatbox app
+    Client-> Server: connect()
+    activate Client
+    activate Server
+    Server --> Client
+    Client-->User: Connection Successful
+    deactivate Server
+    deactivate Client
+end
+deactivate login
+
 
 User -> Client: Sends Message
-Client -> Server: Send Message
+activate Client
+Client -> Server: Send(message)
 activate Server
+
 Server -> Server: Distribute Message to All Clients
-Server --> Client: Receive Message
+Server --> Client
 deactivate Server
+deactivate Client
 
 User -> Client: Sends File
-Client -> Server: Send File
+activate Client
+Client -> Server: Send(file)
 activate Server
 Server -> Server: Distribute File to All Clients
-Server --> Client: Receive File
+Server --> Client
 deactivate Server
+deactivate Client
+
+User -> Client: Recieve Message
+activate Client
+Client -> Server: recieve()
+activate Server
+Server --> Client
+deactivate Server
+Client-->User:message
+deactivate Client
+
+User -> Client: Recieve File
+activate Client
+Client -> Server: recieve()
+activate Server
+Server --> Client
+deactivate Server
+Client-->User:Notification file recieved
+deactivate Client
+
+
+    User->Client:Reconnect
+    activate Client
+    Client-> Server: reconnect()
+    activate Server
+    Server --> Client
+    deactivate Server
+    Client-->User: Reconnection Successful
+    deactivate Client
+
 
 User -> Client: Logs Out
 Client -> Server: Disconnect
 activate Server
+activate Client
 Server --> Client: Connection Closed
 deactivate Server
+deactivate Client
 
 User -> Client: Closes Chat Application
 deactivate Client

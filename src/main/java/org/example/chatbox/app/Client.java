@@ -302,8 +302,8 @@ public class Client extends JFrame {
     }
     public void connect(){
         try {
-            messageSocketHandler = new SocketHandler(12345);
-            fileSocketHandler = new SocketHandler(12346);
+            messageSocketHandler = new SocketHandler(12345);//connection1
+            fileSocketHandler = new SocketHandler(12346);//connection2
             messageSocketHandler.send(this.username);
             bufferedWriter = messageSocketHandler.getBufferedWriter();
             fileOutputStream = fileSocketHandler.getOutputStream();
