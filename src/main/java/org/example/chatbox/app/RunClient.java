@@ -8,11 +8,11 @@ import java.io.IOException;
 import java.net.Socket;
 
 public class RunClient {
-   static boolean proxy = false;
-   static String proxyHost1 = "0.tcp.eu.ngrok.io";
-   static String proxyHost2 = "4.tcp.eu.ngrok.io";
-   static int port1 = 19657;
-   static int port2 = 16732;
+   static boolean proxy = true;
+   static String proxyHost1 = "4.tcp.eu.ngrok.io";
+   static String proxyHost2 = "7.tcp.eu.ngrok.io";
+   static int port1 = 16727;
+   static int port2 = 10601;
     static void connectToServer(Client chatApp2){
         try {
             Socket proxy1 = new Socket(proxyHost1, port1);
