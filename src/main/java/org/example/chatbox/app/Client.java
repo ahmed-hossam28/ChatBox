@@ -230,7 +230,10 @@ public class Client extends JFrame {
             addErrorMessage("Connection failed: Unable to connect to server.");
             connectionStatus = false;
         }
-        else System.out.println("Sending file: " + file.getName());
+        else {
+            System.out.println("Sending file: " + file.getName());
+            JOptionPane.showMessageDialog(this,  "error sending file "+file.getName()+" please try again!","sending error",JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     public void setBufferedWriter(BufferedWriter bufferedWriter){
@@ -263,7 +266,6 @@ public class Client extends JFrame {
             addSuccessMessage("Reconnection successful: Connected to server.");
             connectionStatus = true;
         } catch (IOException e) {
-            addErrorMessage("Reconnection failed: Unable to connect to server.");
             connectionStatus = false;
         }
     }
@@ -280,7 +282,14 @@ public class Client extends JFrame {
         //without error message to the user
         if(proxy){
             try {
-                reconnect(new Socket(proxyHost1, proxyPort1), new Socket(proxyHost2, proxyPort2));
+                messageSocketHandler = new SocketHandler(new Socket(proxyHost1,proxyPort1));
+                fileSocketHandler = new SocketHandler(new Socket(proxyHost2,proxyPort2));
+                messageSocketHandler.send(this.username);
+                bufferedWriter = messageSocketHandler.getBufferedWriter();
+                fileOutputStream = fileSocketHandler.getOutputStream();
+                addSuccessMessage("Reconnection successful: Connected to server.");
+                System.out.println("Reconnection successful: Connected to server.");
+                connectionStatus = true;
             }catch (IOException ex){
                 connectionStatus = false;
             }

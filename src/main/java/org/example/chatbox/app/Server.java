@@ -93,15 +93,12 @@ public class Server extends JFrame {
         try {
             for(var user:users) {
                 MessageSender messageSender = new MessageSender(user.first.getMessageSocketHandler().getBufferedWriter());
-                messageSender.setMessage(messageField.getText());
+                messageSender.setMessage("Server" + ": " + messageField.getText());
                 if(user.second) {
                     if (!messageSender.send()) {
                         System.out.println("[-] connection "+user.first.getName()+" at addr" +user.first.getMessageSocketHandler().getSocket() + " has disconnected!");
                         user.second = false;
                     }
-                    messageSender.setMessage(user.first.getName());
-
-                    messageSender.send();
                 }
             }
 

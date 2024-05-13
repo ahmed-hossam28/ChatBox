@@ -26,7 +26,12 @@ public class RunClient {
         new Thread(() -> {
             while (true) {
                 if (!chatApp2.connectionStatus) {
-                    chatApp2.reconnectInBackground(proxy);
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    // chatApp2.reconnectInBackground(proxy);
                     continue;
                 }
                 MessageReceiver messageReceiver = null;
@@ -40,7 +45,7 @@ public class RunClient {
                 // Receive message
                 while (true) {
                     if (messageReceiver.getBufferedReader() == null) {
-                        System.err.println("Problem is here");
+                        System.err.println("Problem is in message reMessageThrd");
                         break;
                     }
                     if (!messageReceiver.receive()) {
@@ -49,6 +54,7 @@ public class RunClient {
                     }
                     String senderAndMessage = messageReceiver.getMessage(); // Assuming sender's username is sent along with the message
                     int separatorIndex = senderAndMessage.indexOf(":");
+
                     String sender = senderAndMessage.substring(0, separatorIndex).trim();
                     String message = senderAndMessage.substring(separatorIndex + 1).trim();
 
