@@ -40,7 +40,8 @@ public class FileReceiver {
              long fileSize = dataInputStream.readLong();
              this.filename = filename;
              this.fileSize = fileSize;
-             System.out.println(filename);
+             System.out.println("receiving "+filename+"...");
+             System.out.println("file size = "+fileSize);
          } catch (IOException e) {
             // System.err.println(e.getMessage());
              return false;
@@ -49,11 +50,12 @@ public class FileReceiver {
          try  {
              FileOutputStream fileOutputStream = new FileOutputStream(savePath);
 
-             byte[] buffer = new byte[1024];
+             byte[] buffer = new byte[1<<20];
              int bytesRead;
              long bytesReceived = 0;
              while (bytesReceived< this.fileSize && (bytesRead = inputStream.read(buffer)) != -1) {
                  fileOutputStream.write(buffer, 0, bytesRead);
+                 fileOutputStream.flush();
                  bytesReceived+=bytesRead;
              }
              if(bytesReceived!=this.fileSize){

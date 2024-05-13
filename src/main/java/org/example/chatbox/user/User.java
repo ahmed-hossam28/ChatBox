@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 
-public class User {
+public class User{
     String name;
     SocketHandler socketHandler;
   public  User(String name,Socket socket) throws IOException {

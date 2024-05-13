@@ -31,23 +31,20 @@ public class FileSender{
             //
 
             // Write file contents to the output stream
-            byte[] buffer = new byte[1024];//array
+            byte[] buffer = new byte[1<<20];//array
             int bytesRead;
-            int bytesSent = 0;
+            System.out.println("Sending file: " + file.getName()+"...");
+            System.out.println("file size = "+ fileSize);
             while ((bytesRead = fileInputStream.read(buffer)) != -1) {
-                bytesSent+=bytesRead;
                 outputStream.write(buffer, 0, bytesRead);
-            }
-            if(bytesSent!=fileSize){
-                JOptionPane.showMessageDialog(null,"Error sending "+filename+" please try again!","File upload Error",JOptionPane.ERROR_MESSAGE);
+                outputStream.flush();
             }
 
-            outputStream.flush();
 
            fileInputStream.close();//saftey
             // Flush and close streams
 
-            //System.out.println("File " + filename + " sent successfully");
+            System.out.println("File " + filename + " sent successfully");
 
         } catch (IOException e) {
             System.err.println("Error with Sending File: " + e.getMessage());

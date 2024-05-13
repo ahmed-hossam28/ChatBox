@@ -31,7 +31,7 @@ public class RunClient {
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
-                    // chatApp2.reconnectInBackground(proxy);
+                   // chatApp2.reconnectInBackground(proxy);
                     continue;
                 }
                 MessageReceiver messageReceiver = null;

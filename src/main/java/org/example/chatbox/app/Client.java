@@ -78,10 +78,13 @@ public class Client extends JFrame {
         inputPanel.add(fileButton, BorderLayout.WEST);
         JButton reconnectButton = new JButton("Reconnect");
 
-        if(!proxy)
-            reconnectButton.addActionListener(e -> reconnect());
-        else
-            reconnectButton.addActionListener(e -> reconnectUsingProxy());
+
+            reconnectButton.addActionListener(e -> {
+                if(!proxy)
+                    connect();
+                else reconnectUsingProxy();
+            });
+
 
         inputPanel.add(reconnectButton, BorderLayout.NORTH);
 
@@ -232,7 +235,6 @@ public class Client extends JFrame {
             connectionStatus = false;
         }
         else {
-            System.out.println("Sending file: " + file.getName());
             JOptionPane.showMessageDialog(this,"File "+file.getName()+" is sent successfully!");
 
         }

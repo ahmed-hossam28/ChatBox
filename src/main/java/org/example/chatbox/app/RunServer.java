@@ -8,6 +8,7 @@ import org.example.chatbox.user.User;
 
 import javax.swing.*;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 
 public class RunServer {
@@ -84,24 +85,26 @@ public class RunServer {
             FileReceiver fileReceiver = new FileReceiver(server.fileServer.getInputStream());
             fileReceiver.start();//for console to know that server is receiving files
 
-
             while(true){
                 if(fileReceiver.receive()) {
                    // server.sendToMultipleUsers(fileReceiver.getFile());
+
                     for(var user:server.userFileConnections){
-                        if(user.first.getName().equals(sender))continue;
-                        FileSender fileSender = new FileSender(fileReceiver.getFile(), user.first.getSocketHandler().getOutputStream());
-                        if(!fileSender.send()) {
-                            System.err.println("err sending file");
-                            System.out.println("[-]file server for "+user.first.getSocketHandler().getSocket());
-                            user.second=false;
-                        }
-                        System.out.println("Sending file: " + fileReceiver.getFilename());
+                        if (user.first.getName().equals(sender)) continue;
+                        new Thread(()->{
+                            File file = new File("received_files/"+fileReceiver.getFilename());
+                            FileSender fileSender = new FileSender(file, user.first.getSocketHandler().getOutputStream());
+                            if (!fileSender.send()) {
+                                System.err.println("err sending file");
+                                System.out.println("[-]file server for " + user.first.getSocketHandler().getSocket());
+                                user.second = false;
+                            }
+                        }).start();
                     }
 
                     server.userFileConnections.removeIf(user->!user.second);
 
-                    JOptionPane.showMessageDialog(server, fileReceiver.getFilename() + "Received!");
+                   // JOptionPane.showMessageDialog(server, fileReceiver.getFilename() + "Received!");
 
                 }
                 else break;
