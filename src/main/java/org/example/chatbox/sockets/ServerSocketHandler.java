@@ -36,6 +36,7 @@ public class ServerSocketHandler {
 
 
           outputStream = socket.getOutputStream();
+
           outputStreamWriter = new OutputStreamWriter(outputStream);
           bufferedWriter = new BufferedWriter(outputStreamWriter);
 
@@ -48,11 +49,7 @@ public class ServerSocketHandler {
           throw new RuntimeException(e);
       }
   }
-  public void send(String msg)throws IOException{
-      bufferedWriter.write(msg);
-      bufferedWriter.newLine();//
-      bufferedWriter.flush();//send to outputstream
-    }
+
 
     public ServerSocket getServerSocket() {
         return serverSocket;

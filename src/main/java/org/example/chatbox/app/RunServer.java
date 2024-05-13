@@ -1,9 +1,9 @@
 package org.example.chatbox.app;
 
 import org.example.chatbox.File.FileReceiver;
+import org.example.chatbox.File.FileSender;
 import org.example.chatbox.Message.MessageReceiver;
 import org.example.chatbox.pair.Pair;
-import org.example.chatbox.sockets.SocketHandler;
 import org.example.chatbox.user.User;
 
 import javax.swing.*;
@@ -27,7 +27,7 @@ public class RunServer {
                     if (!user.first.getName().equals(sender)) {
                         try {
                             // Send the message along with the sender's username
-                            user.first.getMessageSocketHandler().send(sender + ": " + message);
+                            user.first.getSocketHandler().send(sender + ": " + message);
                         } catch (Exception ex) {
                             System.err.println("Connection broken for user: " + user.first.getName());
                         }
@@ -53,8 +53,8 @@ public class RunServer {
                     server.users.add(new Pair<>(user,true));
                     handelReceiveMessages(server,username);
                 }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            } catch (Exception e) {
+                System.err.println("Connection is failed while connecting");
             }
         }).start();
     }
@@ -65,18 +65,21 @@ public class RunServer {
                 try {
                     System.out.print("FILE:");
                     server.fileServer.start();
-                    server.userFileConnections.add(new Pair<>(new SocketHandler(server.fileServer.getSocket()),true));
+                    User user = new User(server.fileServer.receive(),server.fileServer.getSocket());
+                    server.userFileConnections.add(new Pair<>(user,true));
+
+                    handleReceiveFiles(server,user.getName());
 
                 } catch (IOException e) {
                     System.err.println("file :"+e.getMessage());
                 }
                 //receiving files thread
 
-                handleReceiveFiles(server);
+
             }
         }).start();
     }
-    static void handleReceiveFiles(Server server){
+    static void handleReceiveFiles(Server server,String sender){
         new Thread(()->{
             FileReceiver fileReceiver = new FileReceiver(server.fileServer.getInputStream());
             fileReceiver.start();//for console to know that server is receiving files
@@ -84,7 +87,20 @@ public class RunServer {
 
             while(true){
                 if(fileReceiver.receive()) {
-                    server.sendToMultipleUsers(fileReceiver.getFile());
+                   // server.sendToMultipleUsers(fileReceiver.getFile());
+                    for(var user:server.userFileConnections){
+                        if(user.first.getName().equals(sender))continue;
+                        FileSender fileSender = new FileSender(fileReceiver.getFile(), user.first.getSocketHandler().getOutputStream());
+                        if(!fileSender.send()) {
+                            System.err.println("err sending file");
+                            System.out.println("[-]file server for "+user.first.getSocketHandler().getSocket());
+                            user.second=false;
+                        }
+                        System.out.println("Sending file: " + fileReceiver.getFilename());
+                    }
+
+                    server.userFileConnections.removeIf(user->!user.second);
+
                     JOptionPane.showMessageDialog(server, fileReceiver.getFilename() + "Received!");
 
                 }

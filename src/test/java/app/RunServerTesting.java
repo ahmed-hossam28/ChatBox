@@ -20,7 +20,7 @@ public class RunServerTesting {
         new Thread(() -> {
             User user = null;
            for(var user1:server.users){
-                if(user1.first.getMessageSocketHandler().getSocket() == server.messageServer.getSocket()){
+                if(user1.first.getSocketHandler().getSocket() == server.messageServer.getSocket()){
                     user = user1.first;
                     break;
                 }
@@ -60,7 +60,7 @@ public class RunServerTesting {
         if(chosen==null)
             return false;
         try {
-            messageSender = new MessageSender(chosen.getMessageSocketHandler().getBufferedWriter());
+            messageSender = new MessageSender(chosen.getSocketHandler().getBufferedWriter());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -125,7 +125,7 @@ public class RunServerTesting {
             User user = null;
             for(var user1:server.userFileConnections1){
                 //it is fileSocketHandler
-                if(user1.first.getMessageSocketHandler().getSocket() == server.fileServer.getSocket()){
+                if(user1.first.getSocketHandler().getSocket() == server.fileServer.getSocket()){
                     user = user1.first;
                     break;
                 }

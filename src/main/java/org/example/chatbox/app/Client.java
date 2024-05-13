@@ -228,11 +228,13 @@ public class Client extends JFrame {
         FileSender fileSender = new FileSender(file,fileOutputStream);
         if(!fileSender.send()) {
             addErrorMessage("Connection failed: Unable to connect to server.");
+            JOptionPane.showMessageDialog(this,"there might be Error while sending "+file.getName()+" please try again!","File upload Error",JOptionPane.ERROR_MESSAGE);
             connectionStatus = false;
         }
         else {
             System.out.println("Sending file: " + file.getName());
-            JOptionPane.showMessageDialog(this,  "error sending file "+file.getName()+" please try again!","sending error",JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this,"File "+file.getName()+" is sent successfully!");
+
         }
     }
 
@@ -245,12 +247,7 @@ public class Client extends JFrame {
         try {
             messageSocketHandler = new SocketHandler(12345);
             fileSocketHandler = new SocketHandler(12346);
-            messageSocketHandler.send(this.username);
-            bufferedWriter = messageSocketHandler.getBufferedWriter();
-            fileOutputStream = fileSocketHandler.getOutputStream();
-            addSuccessMessage("Reconnection successful: Connected to server.");
-            System.out.println("Reconnection successful: Connected to server.");
-            connectionStatus = true;
+             initComm(true);
         } catch (IOException e) {
             addErrorMessage("Reconnection failed: Unable to connect to server.");
             connectionStatus = false;
@@ -260,11 +257,7 @@ public class Client extends JFrame {
         try {
             messageSocketHandler = new SocketHandler(socket1);
             fileSocketHandler = new SocketHandler(socket2);
-            messageSocketHandler.send(this.username);
-            bufferedWriter = messageSocketHandler.getBufferedWriter();
-            fileOutputStream = fileSocketHandler.getOutputStream();
-            addSuccessMessage("Reconnection successful: Connected to server.");
-            connectionStatus = true;
+            initComm(true);
         } catch (IOException e) {
             connectionStatus = false;
         }
@@ -313,11 +306,7 @@ public class Client extends JFrame {
         try {
             messageSocketHandler = new SocketHandler(12345);//connection1
             fileSocketHandler = new SocketHandler(12346);//connection2
-            messageSocketHandler.send(this.username);
-            bufferedWriter = messageSocketHandler.getBufferedWriter();
-            fileOutputStream = fileSocketHandler.getOutputStream();
-            addSuccessMessage("Connection successful: Connected to server.");
-            connectionStatus = true ;
+               initComm(false);
         } catch (IOException e) {
             addErrorMessage("Connection failed: Unable to connect to server.");
             connectionStatus = false;
@@ -327,11 +316,7 @@ public class Client extends JFrame {
         try {
             messageSocketHandler = new SocketHandler(socket1);
             fileSocketHandler = new SocketHandler(socket2);
-            messageSocketHandler.send(this.username);
-            bufferedWriter = messageSocketHandler.getBufferedWriter();
-            fileOutputStream = fileSocketHandler.getOutputStream();
-            addSuccessMessage("Connection successful: Connected to server.");
-            connectionStatus = true;
+           initComm(false);
         } catch (IOException e) {
             addErrorMessage("Connection failed: Unable to connect to server.");
             connectionStatus = false;
@@ -341,11 +326,7 @@ public class Client extends JFrame {
         try {
             messageSocketHandler = new SocketHandler(port1);
             fileSocketHandler = new SocketHandler(port2);
-            messageSocketHandler.send(this.username);
-            bufferedWriter = messageSocketHandler.getBufferedWriter();
-            fileOutputStream = fileSocketHandler.getOutputStream();
-            addSuccessMessage("Connection successful: Connected to server.");
-            connectionStatus = true;
+            initComm(false);
         } catch (IOException e) {
             addErrorMessage("Connection failed: Unable to connect to server.");
             connectionStatus = false;
@@ -359,6 +340,20 @@ public class Client extends JFrame {
     public void setProxy(boolean proxy){
         this.proxy = proxy;
     }
-
+    public void initComm(boolean re){
+        messageSocketHandler.send(this.username);
+        fileSocketHandler.send(this.username);
+        bufferedWriter = messageSocketHandler.getBufferedWriter();
+        fileOutputStream = fileSocketHandler.getOutputStream();
+        if(!re) {
+            addSuccessMessage("Connection successful: Connected to server.");
+            System.out.println("Connection successful!");
+        }
+        else {
+            addSuccessMessage("Reconnection successful: Connected to server.");
+            System.out.println("Reconnection successful!");
+        }
+        connectionStatus = true ;
+    }
 
 }

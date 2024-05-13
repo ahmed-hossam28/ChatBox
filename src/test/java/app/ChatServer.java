@@ -114,12 +114,12 @@ public class ChatServer extends JFrame {
     void sendToMultipleUsers(){
         try {
            for(var user:users) {
-               MessageSender messageSender = new MessageSender(user.first.getMessageSocketHandler().getBufferedWriter());
+               MessageSender messageSender = new MessageSender(user.first.getSocketHandler().getBufferedWriter());
                messageSender.setMessage(messageField.getText());
 
               if(user.second) {
                   if (!messageSender.send()) {
-                      System.out.println("[-] connection "+user.first.getName()+" at addr" +user.first.getMessageSocketHandler().getSocket() + " has disconnected!");
+                      System.out.println("[-] connection "+user.first.getName()+" at addr" +user.first.getSocketHandler().getSocket() + " has disconnected!");
                       user.second = false;
                   }
               }
