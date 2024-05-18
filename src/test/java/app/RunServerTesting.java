@@ -1,151 +1,125 @@
 package app;
 
-
 import org.example.chatbox.File.FileReceiver;
+import org.example.chatbox.File.FileSender;
 import org.example.chatbox.Message.MessageReceiver;
-import org.example.chatbox.Message.MessageSender;
 import org.example.chatbox.pair.Pair;
-import org.example.chatbox.sockets.SocketHandler;
 import org.example.chatbox.user.User;
 
 import javax.swing.*;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 
 public class RunServerTesting {
-   static  ChatServer server;
-   static String chosen = "youssef";
-    static void handelReceiveMessages(ChatServer server, String username){
-        //each thread for each client so connection remain
+
+    static void handelReceiveMessages(ChatServer server, String sender) {
         new Thread(() -> {
-            User user = null;
-           for(var user1:server.users){
-                if(user1.first.getMessageSocketHandler().getSocket() == server.messageServer.getSocket()){
-                    user = user1.first;
-                    break;
-                }
-           }
-            BufferedReader bufferedReader = user.getBufferedReader();
+            BufferedReader bufferedReader = server.messageServer.getBufferedReader();
             MessageReceiver messageReceiver = new MessageReceiver(bufferedReader);
-            while (true) {
-                // Receive message
-                if(!messageReceiver.receive())
+            while (server.isRunning) {
+                if (!messageReceiver.receive())
                     break;
-                // System.out.println(messageReceiver.getMessage());
-                // Update GUI with received message
-                if(user.getName().equals("AhmadHossam")) {
-                    if (sendMessageToChosenUser(chosen, messageReceiver.getMessage()))
-                        System.out.println("message to yousef was sent!");
-                }
-                else if(user.getName().equals(chosen)){
-                    if (sendMessageToChosenUser("AhmadHossam", messageReceiver.getMessage()))
-                        System.out.println("message to ahmad hossam was sent!");
+
+                String message = messageReceiver.getMessage();
+
+                // Send to all users except the one who sent it
+                for (var user : server.users) {
+                    if (!user.first.getName().equals(sender)) {
+                        try {
+                            // Send the message along with the sender's username
+                            user.first.getSocketHandler().send(sender + ": " + message);
+                        } catch (Exception ex) {
+                            System.err.println("Connection broken for user: " + user.first.getName());
+                        }
+                    }
                 }
 
+                // Update GUI with received message
                 SwingUtilities.invokeLater(() -> {
-                    server.addMessage(username, messageReceiver.getMessage(), false);
+                    server.addMessage(sender, message, false); // Display sender's username along with the message
                 });
             }
         }).start();
     }
-    static boolean sendMessageToChosenUser(String username,String message){
-        MessageSender messageSender = null;
-        User chosen = null;
-        for(var user:server.users){
-            if(user.first.getName().equals(username)){
-                chosen  = user.first;
-                break;
-            }
-        }
-        if(chosen==null)
-            return false;
-        try {
-            messageSender = new MessageSender(chosen.getMessageSocketHandler().getBufferedWriter());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        messageSender.setMessage(message);
-        return messageSender.send();
-    }
-    static void handleMessagingRequests(ChatServer server){
+
+    static void handleMessagingConnectionRequests(ChatServer server){
         //MessageThread
         new Thread(()-> {
             try {
-                while (true) {
-                    if(!server.isRunning) {
-                        Thread.sleep(1000);
-                        continue;
-                    }
+                while (server.isRunning) {
                     server.messageServer.start();
                     String username = server.messageServer.receive();
                     User user = new User(username, server.messageServer.getSocket());
                     server.users.add(new Pair<>(user,true));
                     handelReceiveMessages(server,username);
-
                 }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+            } catch (Exception e) {
+                System.err.println("Connection is failed while connecting");
             }
         }).start();
     }
-    static void handleFileRequests(ChatServer server){
+    static void handleFileConnectionRequests(ChatServer server){
         //FileThread
         new Thread(()->{
-            while(true){
-                if(!server.isRunning) {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                    continue;
-                }
+            while(server.isRunning) {
                 try {
                     System.out.print("FILE:");
                     server.fileServer.start();
-                    String username =  server.fileServer.receive();
-                    User user = new User(username, server.fileServer.getSocket());
-                    server.users.add(new Pair<>(user,true));
-                    server.userFileConnections1.add(new Pair<>(user,true));
-                    server.userFileConnections.add(new Pair<>(new SocketHandler(server.fileServer.getSocket()),true));
+                    User user = new User(server.fileServer.receive(), server.fileServer.getSocket());
+                    server.userFileConnections.add(new Pair<>(user, true));
+
+                    handleReceiveFiles(server, user.getName());
 
                 } catch (IOException e) {
-                    System.err.println("file :"+e.getMessage());
+                    System.err.println("file :" + e.getMessage());
                 }
                 //receiving files thread
 
-                handleReceiveFiles(server);
+
             }
         }).start();
     }
-    static void handleReceiveFiles(ChatServer server){
+    static void handleReceiveFiles(ChatServer server,String sender){
         new Thread(()->{
-            User user = null;
-            for(var user1:server.userFileConnections1){
-                //it is fileSocketHandler
-                if(user1.first.getMessageSocketHandler().getSocket() == server.fileServer.getSocket()){
-                    user = user1.first;
-                    break;
+            FileReceiver fileReceiver = new FileReceiver(server.fileServer.getInputStream());
+            fileReceiver.start();//for console to know that server is receiving files
+
+            while(server.isRunning){
+                if(fileReceiver.receive()) {
+                    // server.sendToMultipleUsers(fileReceiver.getFile());
+
+                    for(var user:server.userFileConnections){
+                        if (user.first.getName().equals(sender)) continue;
+                        new Thread(()->{
+                            File file = new File("received_files/"+fileReceiver.getFilename());
+                            FileSender fileSender = new FileSender(file, user.first.getSocketHandler().getOutputStream());
+                            if (!fileSender.send()) {
+                                System.err.println("err sending file");
+                                System.out.println("[-]file server for " + user.first.getSocketHandler().getSocket());
+                                user.second = false;
+                            }
+                        }).start();
+                    }
+
+                    server.userFileConnections.removeIf(user->!user.second);
+
+                    // JOptionPane.showMessageDialog(server, fileReceiver.getFilename() + "Received!");
+
                 }
-            }
-            FileReceiver fileReceiver = new FileReceiver(user.getInputStream());
-            fileReceiver.start();
-            while(true){
-                if(fileReceiver.receive())
-                    JOptionPane.showMessageDialog(server,fileReceiver.getFilename()+" Received!");
                 else break;
             }
         }).start();
     }
-    static void runApp(){
+    static void runApp() {
         SwingUtilities.invokeLater(() -> {
-            server = new ChatServer();
+            ChatServer server = new ChatServer();
             server.setVisible(true);
-
-            handleMessagingRequests(server);
-            handleFileRequests(server);
+            new Thread(() -> {
+                handleMessagingConnectionRequests(server);
+                handleFileConnectionRequests(server);
+            }
+            ).start();
         });
     }
 

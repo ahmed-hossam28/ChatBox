@@ -7,32 +7,32 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 
-public class User {
+public class User{
     String name;
-    SocketHandler messageSocketHandler;
+    SocketHandler socketHandler;
   public  User(String name,Socket socket) throws IOException {
         this.name =name;
-        messageSocketHandler = new SocketHandler(socket);
+        socketHandler = new SocketHandler(socket);
     }
-  public void setMessageSocketHandler(SocketHandler messageSocketHandler) {
-        this.messageSocketHandler = messageSocketHandler;
+  public void setSocketHandler(SocketHandler socketHandler) {
+        this.socketHandler = socketHandler;
     }
     public void setSocketHandler(Socket socket) throws IOException {
-      this.messageSocketHandler = new SocketHandler(socket);
+      this.socketHandler = new SocketHandler(socket);
     }
 
     public String getName() {
         return name;
     }
 
-    public SocketHandler getMessageSocketHandler() {
-        return messageSocketHandler;
+    public SocketHandler getSocketHandler() {
+        return socketHandler;
     }
 
     public BufferedReader getBufferedReader() {
-    return   messageSocketHandler.getBufferedReader();
+    return   socketHandler.getBufferedReader();
     }
     public InputStream getInputStream(){
-      return messageSocketHandler.getInputStream();
+      return socketHandler.getInputStream();
     }
 }

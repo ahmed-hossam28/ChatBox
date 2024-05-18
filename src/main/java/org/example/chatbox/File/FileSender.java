@@ -1,6 +1,7 @@
 package org.example.chatbox.File;
 import org.example.chatbox.data.DataSender;
 
+import javax.swing.*;
 import java.io.*;
 
 public class FileSender{
@@ -30,22 +31,26 @@ public class FileSender{
             //
 
             // Write file contents to the output stream
-            byte[] buffer = new byte[1024];//array
+            byte[] buffer = new byte[1<<20];//array
             int bytesRead;
+            System.out.println("Sending file: " + file.getName()+"...");
+            System.out.println("file size = "+ fileSize);
             while ((bytesRead = fileInputStream.read(buffer)) != -1) {
                 outputStream.write(buffer, 0, bytesRead);
+                outputStream.flush();
             }
-            outputStream.flush();
+
 
            fileInputStream.close();//saftey
             // Flush and close streams
 
-            //System.out.println("File " + filename + " sent successfully");
-            return true;
+            System.out.println("File " + filename + " sent successfully");
+
         } catch (IOException e) {
             System.err.println("Error with Sending File: " + e.getMessage());
             return false;
         }
+        return true;
     }
 
     public void setFile(File file){
