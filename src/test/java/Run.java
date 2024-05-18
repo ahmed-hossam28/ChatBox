@@ -6,6 +6,6 @@ import org.example.chatbox.app.RunClient;
 public class Run {
 
     public static void main(String[] args) {
-        RunClient.runApp("person");
+        RunClient.runApp("");
     }
 }

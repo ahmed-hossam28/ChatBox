@@ -4,7 +4,6 @@ import org.example.chatbox.Message.MessageSender;
 import org.example.chatbox.File.FileSender;
 import org.example.chatbox.pair.Pair;
 import org.example.chatbox.sockets.ServerSocketHandler;
-import org.example.chatbox.sockets.SocketHandler;
 import org.example.chatbox.user.User;
 
 import javax.swing.*;
@@ -14,20 +13,18 @@ import java.io.*;
 import java.util.ArrayList;
 
 public class ChatServer extends JFrame {
-    public boolean isRunning = true;
-    public ArrayList<Pair<User,Boolean>>users;
-    public ArrayList<Pair<SocketHandler,Boolean>>userFileConnections;
-    public ArrayList<Pair<User,Boolean>>userFileConnections1;
+    boolean isRunning = true;
+  public  ArrayList<Pair<User,Boolean>>users;
+  public   ArrayList<Pair<User,Boolean>>userFileConnections;
     private JPanel chatPanel;
     private JTextField messageField;
     public ServerSocketHandler messageServer;
-    public ServerSocketHandler fileServer;
+    ServerSocketHandler fileServer;
     JButton startButton;
     JButton stopButton;
     public ChatServer() {
         users = new ArrayList<>();
         userFileConnections = new ArrayList<>();
-        userFileConnections1 = new ArrayList<>();
         try {
             messageServer = new ServerSocketHandler();
             fileServer = new ServerSocketHandler(12346);
@@ -73,7 +70,7 @@ public class ChatServer extends JFrame {
         JButton fileButton = new JButton("Send File");
         fileButton.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
-            int returnValue = fileChooser.showOpenDialog(ChatServer.this);
+            int returnValue = fileChooser.showOpenDialog(this);
             if (returnValue == JFileChooser.APPROVE_OPTION) {
                 File selectedFile = fileChooser.getSelectedFile();
                 sendFile(selectedFile);
@@ -81,6 +78,7 @@ public class ChatServer extends JFrame {
         });
         inputPanel.add(fileButton, BorderLayout.WEST);
 
+        add(inputPanel, BorderLayout.SOUTH);
 
         startButton = new JButton("Start");
         startButton.addActionListener(e -> startServer());
@@ -88,16 +86,15 @@ public class ChatServer extends JFrame {
         // Create stop button
         stopButton = new JButton("Stop");
         stopButton.addActionListener(e -> stopServer());
-        stopButton.setEnabled(false);
+        stopButton.setEnabled(true);
 
+        startButton.setEnabled(false);
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(startButton);
         buttonPanel.add(stopButton);
-
-        // Add buttons to the frame
         add(buttonPanel, BorderLayout.NORTH);
 
-        add(inputPanel, BorderLayout.SOUTH);
+
     }
     void sendMsg(){
         String message = messageField.getText();
@@ -110,28 +107,25 @@ public class ChatServer extends JFrame {
             messageField.setText("");
         }
     }
-
     void sendToMultipleUsers(){
         try {
-           for(var user:users) {
-               MessageSender messageSender = new MessageSender(user.first.getSocketHandler().getBufferedWriter());
-               messageSender.setMessage(messageField.getText());
+            for(var user:users) {
+                MessageSender messageSender = new MessageSender(user.first.getSocketHandler().getBufferedWriter());
+                messageSender.setMessage("Server" + ": " + messageField.getText());
+                if(user.second) {
+                    if (!messageSender.send()) {
+                        System.out.println("[-] connection "+user.first.getName()+" at addr" +user.first.getSocketHandler().getSocket() + " has disconnected!");
+                        user.second = false;
+                    }
+                }
+            }
 
-              if(user.second) {
-                  if (!messageSender.send()) {
-                      System.out.println("[-] connection "+user.first.getName()+" at addr" +user.first.getSocketHandler().getSocket() + " has disconnected!");
-                      user.second = false;
-                  }
-              }
-           }
-
-           users.removeIf(user-> !user.second);
+            users.removeIf(user-> !user.second);
 
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
     }
-
     void sendToSingleUser(){
         MessageSender messageSender = null;
         try {
@@ -184,17 +178,17 @@ public class ChatServer extends JFrame {
     }
     public void sendToMultipleUsers(File file){
         for(var usersFileHandler:userFileConnections){
-            FileSender fileSender = new FileSender(file, usersFileHandler.first.getOutputStream());
+            FileSender fileSender = new FileSender(file, usersFileHandler.first.getSocketHandler().getOutputStream());
             if(!fileSender.send()) {
                 System.err.println("err sending file");
-                System.out.println("[-]file server for "+usersFileHandler.first.getSocket());
+                System.out.println("[-]file server for "+usersFileHandler.first.getSocketHandler().getSocket());
                 usersFileHandler.second=false;
             }
-            System.out.println("Sending file: " + file.getName());
         }
 
         userFileConnections.removeIf(user->!user.second);
     }
+
 
     private void stopServer() {
         // Stop the server

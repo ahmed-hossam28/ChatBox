@@ -89,9 +89,11 @@ public class ServerSocketHandler {
 
     public void close() throws IOException {
         serverSocket.close();
-        bufferedReader.close();
-        inputStream.close();
-        outputStream.close();
-        bufferedWriter.close();
+        if(bufferedReader!=null) {
+            bufferedReader.close();
+            inputStream.close();
+            outputStream.close();
+            bufferedWriter.close();
+        }
     }
 }

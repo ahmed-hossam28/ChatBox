@@ -165,7 +165,6 @@ public class Server extends JFrame {
                 System.out.println("[-]file server for "+usersFileHandler.first.getSocketHandler().getSocket());
                 usersFileHandler.second=false;
             }
-            System.out.println("Sending file: " + file.getName());
         }
 
         userFileConnections.removeIf(user->!user.second);

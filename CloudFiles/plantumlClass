@@ -4,10 +4,10 @@
 
 class RunServer {
 
-    + handelReceiveMessages(server: Server): void
+    + handelReceiveMessages(server: Server,sender:String): void
     + handleMessagingConnectionRequests(server: Server): void
     + handleFileConnectionRequests(server: Server): void
-    + handleReceiveFiles(server: Server): void
+    + handleReceiveFiles(server: Server,sender:String): void
     + runApp(): void
 }
 
@@ -16,7 +16,7 @@ class RunServer {
 
 class Server {
     + users: ArrayList<Pair<User, Boolean>>
-    +userFileConnections: ArrayList<Pair<SocketHandler, Boolean>>
+    + userFileConnections: ArrayList<Pair<User, Boolean>>
     + messageServer: ServerSocketHandler
     + fileServer: ServerSocketHandler
     + Server()
@@ -145,7 +145,7 @@ class SocketHandler {
 
 class User {
     - name: String
-    - messageSocketHandler: SocketHandler
+    - socketHandler: SocketHandler
     + User(name: String, socket: Socket)
     + setMessageSocketHandler(messageSocketHandler: SocketHandler): void
     + setSocketHandler(socket: Socket): void

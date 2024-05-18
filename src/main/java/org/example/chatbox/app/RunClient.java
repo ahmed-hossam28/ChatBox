@@ -9,10 +9,10 @@ import java.net.Socket;
 
 public class RunClient {
    static boolean proxy = true;
-   static String proxyHost1 = "4.tcp.eu.ngrok.io";
-   static String proxyHost2 = "7.tcp.eu.ngrok.io";
-   static int port1 = 16727;
-   static int port2 = 10601;
+   static String proxyHost1 = "5.tcp.eu.ngrok.io";
+   static String proxyHost2 = "2.tcp.eu.ngrok.io";
+   static int port1 = 13671;
+   static int port2 = 19965;
     static void connectToServer(Client chatApp2){
         try {
             Socket proxy1 = new Socket(proxyHost1, port1);
